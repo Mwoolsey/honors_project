@@ -6,6 +6,7 @@ Main_menu::Main_menu( sf::RenderWindow* window, sf::Texture* bg )
 {
   int window_width = _window->getSize().x;
   int window_height = _window->getSize().y;
+  // preload images into memory so texture swap is faster
   if ( !_background_image.loadFromFile( "assets/main_menu_bg.png" ) )
     throw std::runtime_error( "Error loading main_menu_bg.png" );
   if ( !_start_button_up_texture.loadFromFile( "assets/StartButtonUp.png" ) )
@@ -18,10 +19,10 @@ Main_menu::Main_menu( sf::RenderWindow* window, sf::Texture* bg )
   if ( !_join_button_down_texture.loadFromFile( "assets/JoinButtonDown.png" ) )
     throw std::runtime_error( "Error loading JoinButtonDown.png" );
 
+  // set button locations
   _start_button_sprite.setPosition( sf::Vector2f(
       ( ( window_width / 2 ) - ( _start_button_up_texture.getSize().x / 2 ) ),
       window_height / 3 ) );
-
   _join_button_sprite.setPosition( sf::Vector2f(
       ( ( window_width / 2 ) - ( _join_button_up_texture.getSize().x / 2 ) ),
       window_height / 2 ) );
@@ -89,18 +90,18 @@ int Main_menu::event_handler( int button_hovered )
       }
       case sf::Event::MouseButtonReleased:
       {
-        if ( button_hovered == 0 )
-        {
-          return 0;
-          break;
-        }
-        else if ( button_hovered == 1 )
+        if ( button_hovered == 1 )
         {
           return 1;
+          break;
+        }
+        else if ( button_hovered == 2 )
+        {
+          return 2;
         }
         else
         {
-          return 2;
+          return 0;
         }
       }
       default:

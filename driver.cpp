@@ -37,9 +37,6 @@ int main( int argc, char* argv[] )
       else if ( selection == 2 )
         std::cout << "Client\n";
     }
-    // window->clear();
-    // window->draw( dualWield );
-    // window->display();
   }
 
   // delete jump;
