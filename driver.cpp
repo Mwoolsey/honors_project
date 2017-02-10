@@ -27,10 +27,16 @@ int main( int argc, char* argv[] )
 
   while ( window->isOpen() )
   {
-    // start by bringing up the main menu
-    if ( menu->run() )
-      ;  // true is server and false is client
-
+    int selection = 0;
+    while ( !( selection ) && window->isOpen() )
+    {
+      selection = menu->run();
+      // find out which button was selected
+      if ( selection == 1 )
+        std::cout << "Server\n";
+      else if ( selection == 2 )
+        std::cout << "Client\n";
+    }
     // window->clear();
     // window->draw( dualWield );
     // window->display();

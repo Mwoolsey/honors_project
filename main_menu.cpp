@@ -32,12 +32,13 @@ int Main_menu::run( void )
   if ( !_background_texture->loadFromImage( _background_image ) )
     throw std::runtime_error( "Error loading main_menu_bg.png" );
 
+  // set the background sprite to the global background texture which now
+  // holds the main menu background
   _main_menu_bg.setTexture( *_background_texture );
 
-  // get position of mouse relative to the window
-  sf::Vector2i position = sf::Mouse::getPosition( *_window );
+  int button_selection = mouse_over_box();
 
-  event_handler( handle_button_animation( position ) );
+  // handle any events and pass which button, if any, the mouse is over
 
   _window->clear();
 
@@ -46,18 +47,24 @@ int Main_menu::run( void )
   _window->draw( _start_button_sprite );
   _window->draw( _join_button_sprite );
   _window->display();
+  int button_clicked = event_handler( button_selection );
+  return button_clicked;
 }
 
-int Main_menu::handle_button_animation( sf::Vector2i& position )
+// returns which box, if any, the mouse is hovering over
+// 0 = no button
+// 1 = start button
+// 2 = join button
+int Main_menu::mouse_over_box()
 {
-  if ( ( position.x > 410 && position.x < 590 ) &&
-       ( position.y > 210 && position.y < 250 ) )
+  if ( ( _start_button_sprite.getGlobalBounds().contains(
+          (sf::Vector2f)sf::Mouse::getPosition( *_window ) ) ) )
   {
     _start_button_sprite.setTexture( _start_button_down_texture );
     return 1;
   }
-  if ( ( position.x > 410 && position.x < 590 ) &&
-       ( position.y > 315 && position.y < 360 ) )
+  if ( ( _join_button_sprite.getGlobalBounds().contains(
+          (sf::Vector2f)sf::Mouse::getPosition( ( *_window ) ) ) ) )
   {
     _join_button_sprite.setTexture( _join_button_down_texture );
     return 2;
@@ -89,12 +96,10 @@ int Main_menu::event_handler( int button_hovered )
         }
         else if ( button_hovered == 1 )
         {
-          _window->close();
           return 1;
         }
         else
         {
-          _window->close();
           return 2;
         }
       }
@@ -102,4 +107,5 @@ int Main_menu::event_handler( int button_hovered )
         break;
     }
   }
+  return 0;
 }

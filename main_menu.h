@@ -19,7 +19,7 @@ class Main_menu
   sf::Sprite _main_menu_bg, _start_button_sprite, _join_button_sprite;
   // This function handles which texture is loaded for the buttons
   //   it returns which button it is on, returns zero if not on a button
-  int handle_button_animation( sf::Vector2i& position );
+  int mouse_over_box();
   int event_handler( int button_hovered );
 };
 
