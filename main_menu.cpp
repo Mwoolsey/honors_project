@@ -1,7 +1,8 @@
 #include "main_menu.h"
 #include <stdexcept>
 
-Main_menu::Main_menu( sf::RenderWindow* window, sf::Texture* bg )
+MainMenu::MainMenu( std::shared_ptr<sf::RenderWindow> window,
+                    std::shared_ptr<sf::Texture> bg )
     : _window( window ), _background_texture( bg )
 {
   int window_width = _window->getSize().x;
@@ -28,7 +29,7 @@ Main_menu::Main_menu( sf::RenderWindow* window, sf::Texture* bg )
       window_height / 2 ) );
 }
 
-int Main_menu::run( void )
+int MainMenu::run( void )
 {
   if ( !_background_texture->loadFromImage( _background_image ) )
     throw std::runtime_error( "Error loading main_menu_bg.png" );
@@ -56,7 +57,7 @@ int Main_menu::run( void )
 // 0 = no button
 // 1 = start button
 // 2 = join button
-int Main_menu::mouse_over_box()
+int MainMenu::mouse_over_box()
 {
   if ( ( _start_button_sprite.getGlobalBounds().contains(
           (sf::Vector2f)sf::Mouse::getPosition( *_window ) ) ) )
@@ -75,7 +76,7 @@ int Main_menu::mouse_over_box()
   return 0;
 }
 
-int Main_menu::event_handler( int button_hovered )
+int MainMenu::event_handler( int button_hovered )
 {
   sf::Event event;
 

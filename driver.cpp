@@ -1,5 +1,7 @@
 #include <iostream>
+#include <memory>
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
 #include "main_menu.h"
 int main( int argc, char* argv[] )
 {
@@ -7,9 +9,9 @@ int main( int argc, char* argv[] )
   //////////////////////////////////////////////////////////////////////////////
   int window_width = 1000;
   int window_height = 626;
-  sf::RenderWindow* window;
-  window = new sf::RenderWindow( sf::VideoMode( window_width, window_height ),
-                                 "My Window" );
+  std::shared_ptr<sf::RenderWindow> window( new sf::RenderWindow(
+      sf::VideoMode( window_width, window_height ), "My Window" ) );
+  // sf::RenderWindow* window;
   window->setPosition( sf::Vector2i(
       ( sf::VideoMode::getDesktopMode().width / 2 ) - ( window_width / 2 ),
       ( sf::VideoMode::getDesktopMode().height / 2 ) -
@@ -19,11 +21,11 @@ int main( int argc, char* argv[] )
 
   //  Create textures that need to live for the life of the program
   //////////////////////////////////////////////////////////////////////////////
-  sf::Texture* background = new sf::Texture;
+  std::shared_ptr<sf::Texture> background( new sf::Texture );
   /****************************************************************************/
 
   // create the menu object and pass it the window and texture addresses
-  Main_menu* menu = new Main_menu( window, background );
+  std::shared_ptr<MainMenu> menu( new MainMenu( window, background ) );
 
   while ( window->isOpen() )
   {
@@ -35,11 +37,9 @@ int main( int argc, char* argv[] )
       if ( selection == 1 )
         std::cout << "Server\n";
       else if ( selection == 2 )
-        std::cout << "Client\n";
+        window->close();
     }
   }
-
-  // delete jump;
 
   return 0;
 }
