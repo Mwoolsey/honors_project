@@ -10,6 +10,7 @@ class MainMenu
  public:
   MainMenu( std::shared_ptr<sf::RenderWindow> window,
             std::shared_ptr<sf::Texture> bg );
+  ~MainMenu();
   int run( void );
 
  private:

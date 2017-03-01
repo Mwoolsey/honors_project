@@ -1,4 +1,5 @@
 #include "main_menu.h"
+#include "includes/keypresses.hpp"
 #include <stdexcept>
 
 MainMenu::MainMenu( std::shared_ptr<sf::RenderWindow> window,
@@ -27,6 +28,12 @@ MainMenu::MainMenu( std::shared_ptr<sf::RenderWindow> window,
   _join_button_sprite.setPosition( sf::Vector2f(
       ( ( window_width / 2 ) - ( _join_button_up_texture.getSize().x / 2 ) ),
       window_height / 2 ) );
+}
+
+MainMenu::~MainMenu()
+{
+  _window.reset();
+  _background_texture.reset();
 }
 
 int MainMenu::run( void )
@@ -80,6 +87,7 @@ int MainMenu::event_handler( int button_hovered )
 {
   sf::Event event;
 
+  // stay on menu until a valid button was pressed
   while ( _window->pollEvent( event ) )
   {
     switch ( event.type )
@@ -98,7 +106,7 @@ int MainMenu::event_handler( int button_hovered )
         }
         else if ( button_hovered == 2 )
         {
-          return 2;
+          return keys::EXIT;
         }
         else
         {
