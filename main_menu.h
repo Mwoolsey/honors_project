@@ -2,17 +2,20 @@
 #define MAIN_MENU_H
 
 #include <iostream>
+#include <memory>
 #include <SFML/Graphics.hpp>
 
-class Main_menu
+class MainMenu
 {
  public:
-  Main_menu( sf::RenderWindow* window, sf::Texture* bg );
+  MainMenu( std::shared_ptr<sf::RenderWindow> window,
+            std::shared_ptr<sf::Texture> bg );
+  ~MainMenu();
   int run( void );
 
  private:
-  sf::RenderWindow* _window;
-  sf::Texture* _background_texture;
+  std::shared_ptr<sf::RenderWindow> _window;
+  std::shared_ptr<sf::Texture> _background_texture;
   sf::Texture _start_button_up_texture, _start_button_down_texture,
       _join_button_up_texture, _join_button_down_texture;
   sf::Image _background_image;
