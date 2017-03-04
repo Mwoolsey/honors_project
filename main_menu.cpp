@@ -45,18 +45,22 @@ int MainMenu::run( void )
   // holds the main menu background
   _main_menu_bg.setTexture( *_background_texture );
 
-  int button_selection = mouse_over_box();
+  int button_clicked = 0;
+  while ( button_clicked == 0 )
+  {
+    int button_selection = mouse_over_box();
 
-  // handle any events and pass which button, if any, the mouse is over
+    // handle any events and pass which button, if any, the mouse is over
 
-  _window->clear();
+    _window->clear();
 
-  // Draw everything to the window
-  _window->draw( _main_menu_bg );
-  _window->draw( _start_button_sprite );
-  _window->draw( _join_button_sprite );
-  _window->display();
-  int button_clicked = event_handler( button_selection );
+    // Draw everything to the window
+    _window->draw( _main_menu_bg );
+    _window->draw( _start_button_sprite );
+    _window->draw( _join_button_sprite );
+    _window->display();
+    button_clicked = event_handler( button_selection );
+  }
   return button_clicked;
 }
 

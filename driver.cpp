@@ -6,6 +6,7 @@
 #include <SFML/Network.hpp>
 #include "message_handler.h"
 #include "main_menu.h"
+#include "char_select.h"
 
 #include "includes/keypresses.hpp"
 
@@ -35,6 +36,8 @@ int main( int argc, char* argv[] )
 
   // create the menu object and pass it the window and texture addresses
   std::shared_ptr<MainMenu> menu( new MainMenu( window, background ) );
+  std::shared_ptr<CharSelect> char_select(
+      new CharSelect( window, background ) );
 
   // start the messenger
   std::shared_ptr<MessageHandler> messenger(
@@ -46,19 +49,16 @@ int main( int argc, char* argv[] )
   std::set<unsigned int> their_message;
   while ( window->isOpen() )
   {
-    // only run main menu when selection is needed
-    while ( !selection && window->isOpen() )
+    // get what button was pressed. If run() returns a 1 then the program
+    // is to move on.
+    selection = menu->run();
+    if ( selection == keys::EXIT )
     {
-      // get what button was pressed. If run() returns a 1 then the program
-      // is to move on.
-      selection = menu->run();
-      if ( selection == keys::EXIT )
-      {
-        window->close();
-        goto WINDOW_DONE;
-      }
-      my_message.insert( keys::STARTED );
+      window->close();
+      goto WINDOW_DONE;
     }
+    my_message.insert( keys::STARTED );
+    /*
     // wait until player 2 is ready
     while ( !player2_ready )
     {
@@ -85,10 +85,12 @@ int main( int argc, char* argv[] )
     }
     my_message.clear();
     their_message.clear();
+    */
 
-    window->close();  // temporary until next phase
+    char_select->run();
 
-  }  // window loop
+  }                 // window loop
+  window->close();  // temporary until next phase
 
 WINDOW_DONE:
 
