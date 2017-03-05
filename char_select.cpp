@@ -52,6 +52,7 @@ int CharSelect::run( void )
     // check if character is selected
     char_selected = event_handler( over_char );
 
+    _window->clear();
     // have to draw background before anything else
     _window->draw( _char_select_bg );
 

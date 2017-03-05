@@ -44,6 +44,17 @@ class MessageHandler
    */
   void stop_messages( void );
 
+  /*
+   * Function set_blocking changes the blocking state of the socket based
+   * on the parameter.
+   *
+   * @param bool set - the state of the socket blocking
+   */
+  void set_blocking( bool set )
+  {
+    _socket.setBlocking( set );
+  };
+
  private:
   std::string _ipaddress;
   unsigned short _port;

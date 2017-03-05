@@ -32,6 +32,8 @@ int main( int argc, char* argv[] )
   //  Create textures that need to live for the life of the program
   //////////////////////////////////////////////////////////////////////////////
   std::shared_ptr<sf::Texture> background( new sf::Texture );
+  sf::Image waiting;
+  waiting.loadFromFile( "assets/waiting.png" );
   /****************************************************************************/
 
   // create the menu object and pass it the window and texture addresses
@@ -58,6 +60,13 @@ int main( int argc, char* argv[] )
       goto WINDOW_DONE;
     }
     my_message.insert( keys::STARTED );
+
+    // show waiting background
+    background->loadFromImage( waiting );
+    sf::Sprite wait_bg_sprite( *background );
+    window->clear();
+    window->draw( wait_bg_sprite );
+    window->display();
     // wait until player 2 is ready
     while ( !player2_ready )
     {
@@ -83,13 +92,66 @@ int main( int argc, char* argv[] )
       }
     }
     my_message.clear();
-    their_message.clear();
+    ////////////////////////////////////////////////////////////////////////////
 
+    while ( ( their_message = messenger->get_message() ).size() > 0 )
+    {
+      // get rid of any outstanding messages
+    }
+
+    // start character selection
+    ////////////////////////////////////////////////////////////////////////////
+    player2_ready = false;
     int character = char_select->run();
     if ( character == keys::EXIT )
     {
       window->close();
     }
+
+    background->loadFromImage( waiting );
+    window->clear();
+    window->draw( wait_bg_sprite );
+    window->display();
+    std::cout << "I chose character: " << character << std::endl;
+    my_message.insert( character );
+    // wait until player 2 is ready
+    while ( !player2_ready )
+    {
+      // send message to player 2 that we are ready
+      messenger->send_message( my_message );
+
+      their_message.clear();
+      their_message = messenger->get_message();
+
+      // check what the message was and handle accordingly
+      if ( their_message.size() > 0 && their_message.size() < 2 )
+      {
+        int msg = *their_message.begin();
+        if ( msg < 8 && msg >= 0 )
+        {
+          std::cout << "Player 2 chose: " << *their_message.begin()
+                    << std::endl;
+          player2_ready = true;
+          break;
+        }
+        if ( their_message.count( keys::EXIT ) )
+        {
+          // if the other player exits, close local session
+          // for now
+          std::cout << "Player 2 exited\n";
+          window->close();
+          goto WINDOW_DONE;
+        }
+      }
+    }
+    my_message.clear();
+    their_message.clear();
+
+    while ( ( their_message = messenger->get_message() ).size() > 0 )
+    {
+      // get rid of any outstanding messages
+    }
+    ////////////////////////////////////////////////////////////////////////////
 
     window->close();  // temporary until next phase
   }                   // window loop
