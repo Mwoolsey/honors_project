@@ -58,7 +58,6 @@ int main( int argc, char* argv[] )
       goto WINDOW_DONE;
     }
     my_message.insert( keys::STARTED );
-    /*
     // wait until player 2 is ready
     while ( !player2_ready )
     {
@@ -85,12 +84,15 @@ int main( int argc, char* argv[] )
     }
     my_message.clear();
     their_message.clear();
-    */
 
-    char_select->run();
+    int character = char_select->run();
+    if ( character == keys::EXIT )
+    {
+      window->close();
+    }
 
-  }                 // window loop
-  window->close();  // temporary until next phase
+    window->close();  // temporary until next phase
+  }                   // window loop
 
 WINDOW_DONE:
 

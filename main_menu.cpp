@@ -99,7 +99,7 @@ int MainMenu::event_handler( int button_hovered )
       case sf::Event::Closed:
       {
         _window->close();
-        break;
+        return keys::EXIT;
       }
       case sf::Event::MouseButtonReleased:
       {
