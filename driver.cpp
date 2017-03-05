@@ -6,6 +6,7 @@
 #include <SFML/Network.hpp>
 #include "message_handler.h"
 #include "main_menu.h"
+#include "char_select.h"
 
 #include "includes/keypresses.hpp"
 
@@ -31,10 +32,14 @@ int main( int argc, char* argv[] )
   //  Create textures that need to live for the life of the program
   //////////////////////////////////////////////////////////////////////////////
   std::shared_ptr<sf::Texture> background( new sf::Texture );
+  sf::Image waiting;
+  waiting.loadFromFile( "assets/waiting.png" );
   /****************************************************************************/
 
   // create the menu object and pass it the window and texture addresses
   std::shared_ptr<MainMenu> menu( new MainMenu( window, background ) );
+  std::shared_ptr<CharSelect> char_select(
+      new CharSelect( window, background ) );
 
   // start the messenger
   std::shared_ptr<MessageHandler> messenger(
@@ -46,19 +51,22 @@ int main( int argc, char* argv[] )
   std::set<unsigned int> their_message;
   while ( window->isOpen() )
   {
-    // only run main menu when selection is needed
-    while ( !selection && window->isOpen() )
+    // get what button was pressed. If run() returns a 1 then the program
+    // is to move on.
+    selection = menu->run();
+    if ( selection == keys::EXIT )
     {
-      // get what button was pressed. If run() returns a 1 then the program
-      // is to move on.
-      selection = menu->run();
-      if ( selection == keys::EXIT )
-      {
-        window->close();
-        goto WINDOW_DONE;
-      }
-      my_message.insert( keys::STARTED );
+      window->close();
+      goto WINDOW_DONE;
     }
+    my_message.insert( keys::STARTED );
+
+    // show waiting background
+    background->loadFromImage( waiting );
+    sf::Sprite wait_bg_sprite( *background );
+    window->clear();
+    window->draw( wait_bg_sprite );
+    window->display();
     // wait until player 2 is ready
     while ( !player2_ready )
     {
@@ -84,11 +92,69 @@ int main( int argc, char* argv[] )
       }
     }
     my_message.clear();
+    ////////////////////////////////////////////////////////////////////////////
+
+    while ( ( their_message = messenger->get_message() ).size() > 0 )
+    {
+      // get rid of any outstanding messages
+    }
+
+    // start character selection
+    ////////////////////////////////////////////////////////////////////////////
+    player2_ready = false;
+    int character = char_select->run();
+    if ( character == keys::EXIT )
+    {
+      window->close();
+    }
+
+    background->loadFromImage( waiting );
+    window->clear();
+    window->draw( wait_bg_sprite );
+    window->display();
+    std::cout << "I chose character: " << character << std::endl;
+    my_message.insert( character );
+    // wait until player 2 is ready
+    while ( !player2_ready )
+    {
+      // send message to player 2 that we are ready
+      messenger->send_message( my_message );
+
+      their_message.clear();
+      their_message = messenger->get_message();
+
+      // check what the message was and handle accordingly
+      if ( their_message.size() > 0 && their_message.size() < 2 )
+      {
+        int msg = *their_message.begin();
+        if ( msg < 8 && msg >= 0 )
+        {
+          std::cout << "Player 2 chose: " << *their_message.begin()
+                    << std::endl;
+          player2_ready = true;
+          break;
+        }
+        if ( their_message.count( keys::EXIT ) )
+        {
+          // if the other player exits, close local session
+          // for now
+          std::cout << "Player 2 exited\n";
+          window->close();
+          goto WINDOW_DONE;
+        }
+      }
+    }
+    my_message.clear();
     their_message.clear();
 
-    window->close();  // temporary until next phase
+    while ( ( their_message = messenger->get_message() ).size() > 0 )
+    {
+      // get rid of any outstanding messages
+    }
+    ////////////////////////////////////////////////////////////////////////////
 
-  }  // window loop
+    window->close();  // temporary until next phase
+  }                   // window loop
 
 WINDOW_DONE:
 
