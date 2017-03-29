@@ -1,5 +1,5 @@
-#include "char_select.h"
 #include "includes/keypresses.hpp"
+#include "char_select.h"
 #include <stdexcept>
 
 CharSelect::CharSelect( std::shared_ptr<sf::RenderWindow> window,

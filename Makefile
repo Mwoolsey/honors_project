@@ -1,9 +1,9 @@
 # Makefile
 CXX = g++
 MAIN = driver
-CPP_FILES = main_menu.cpp message_handler.cpp char_select.cpp
-H_FILES = main_menu.h message_handler.h char_select.h
-O_FILES = main_menu.o message_handler.o char_select.o
+CPP_FILES = main_menu.cpp message_handler.cpp char_select.cpp character.cpp images.cpp
+H_FILES = main_menu.h message_handler.h char_select.h character.h images.h
+O_FILES = main_menu.o message_handler.o char_select.o character.o images.o
 CXXFLAGS = -Wall -std=c++11 -c
 PACKAGES = -lsfml-graphics -lsfml-window -lsfml-system -lsfml-network
 

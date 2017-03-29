@@ -1,14 +1,15 @@
-#include <iostream>
+#include "includes/keypresses.hpp"
+
 #include <string>
 #include <memory>
-#include <set>
+#include <iostream>
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
+#include <set>
 #include "message_handler.h"
 #include "main_menu.h"
 #include "char_select.h"
-
-#include "includes/keypresses.hpp"
 
 int main( int argc, char* argv[] )
 {

@@ -1,5 +1,5 @@
-#include "main_menu.h"
 #include "includes/keypresses.hpp"
+#include "main_menu.h"
 #include <stdexcept>
 
 MainMenu::MainMenu( std::shared_ptr<sf::RenderWindow> window,

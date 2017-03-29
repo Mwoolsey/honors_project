@@ -1,11 +1,13 @@
 #ifndef MESSAGE_HANDLER_H
 #define MESSAGE_HANDLER_H
 
-#include <iostream>
 #include <string>
-#include <set>
 #include <memory>
+#include <iostream>
+
+#include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
+#include <set>
 
 class MessageHandler
 {
