@@ -1,0 +1,11 @@
+Sub-images:
+6
+
+Dimensions:
+300px, 100px
+
+Horizontal-offsets:
+0px, 50px, 100px, 150px, 200px, 250px
+
+Sub-image widths:
+50px, 50px, 50px, 50px, 50px, 50px

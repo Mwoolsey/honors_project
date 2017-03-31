@@ -1,0 +1,14 @@
+crouch1 2
+crouch2 2
+hit1 4
+hit2 4
+idle1 4
+idle2 4
+jump1 7
+jump2 7
+kick1 3
+kick2 3
+punch1 3
+punch2 3
+walk1 5
+walk2 5

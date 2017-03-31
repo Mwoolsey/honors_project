@@ -2,34 +2,45 @@
 #define CHARACTER_H
 
 #include "includes/status.hpp"
+#include "includes/events.hpp"
 
 #include <string>
 #include <memory>
 #include <iostream>
 #include <vector>
+#include <unordered_map>
+#include <algorithm>
 
+/*
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
-#include <unordered_map>
+*/
 
 #include "images.h"
+
+using namespace events;
+using namespace status;
 
 class Character
 {
  public:
   Character( const std::string &name, unsigned int player );
   ~Character( void );
-  void update( const std::vector<int> events );
+  void update( const std::vector<CHARACTER_EVENT> events );
   unsigned int get_health( void );
+  /*
   const sf::Vector2f get_position( void );
   std::shared_ptr<sf::Texture> get_texture( void );
+  */
 
  private:
   std::string _name;
-  unsigned int _cur_health, _max_health;
+  unsigned int _cur_health;
   int _x_pos, _y_pos;
-  std::shared_ptr<sf::Texture> _character_texture;
+  // std::shared_ptr<sf::Texture> _character_texture;
   Images _images;
-  status::STATUS _status;
+  unsigned int execution_position[HIT];
+  std::unordered_map<std::string, unsigned int> position_counts;
+  STATUS _status;
 };
 #endif /*CHARACTER_H*/

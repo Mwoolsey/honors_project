@@ -1,5 +1,0 @@
-Horizontal:
-0px, 50px, 90px, 130px, 166px, 204px, 244px
-
-Width:
-50px, 40px, 40px, 33px, 38px, 40px, 50px
