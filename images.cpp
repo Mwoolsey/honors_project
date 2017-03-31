@@ -9,6 +9,10 @@ Images::Images( const std::string &name )
   _images.insert(
       std::make_pair<std::string, sf::Image>( "idle2", sf::Image() ) );
   _images.insert(
+      std::make_pair<std::string, sf::Image>( "hit1", sf::Image() ) );
+  _images.insert(
+      std::make_pair<std::string, sf::Image>( "hit2", sf::Image() ) );
+  _images.insert(
       std::make_pair<std::string, sf::Image>( "crouch1", sf::Image() ) );
   _images.insert(
       std::make_pair<std::string, sf::Image>( "crouch2", sf::Image() ) );

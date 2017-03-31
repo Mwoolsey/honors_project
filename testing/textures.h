@@ -6,6 +6,7 @@
 #include <exception>
 #include <memory>
 #include <string>
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 #include <utility>
@@ -19,13 +20,11 @@ class Textures
 {
  public:
   Textures( const std::string &name );
-  std::shared_ptr<sf::Texture> get_texture( const std::string &img_name,
-                                            unsigned int offset );
+  sf::Texture get_texture( const std::string &img_name, unsigned int offset );
 
  private:
   Images _images;
-  std::unordered_map<std::string, std::vector<std::shared_ptr<sf::Texture> > >
-      _textures;
+  std::unordered_map<std::string, std::vector<sf::Texture> > _textures;
   // 0: crouch, 1: hit, 2: idle, 3: jump, 4: kick, 5: punch, 6: walk
   std::vector<unsigned int> _image_counts, _widths, _heights;
   std::vector<std::vector<unsigned int> > _offsets, _sub_widths;
