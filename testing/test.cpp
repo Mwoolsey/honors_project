@@ -7,6 +7,7 @@ using namespace std;
 
 int main( int argc, char* argv[] )
 {
+  // create a ryu character as player 1
   Character c( "ryu", 1 );
 
   sf::RenderWindow window( sf::VideoMode( 800, 600 ), "My Window" );

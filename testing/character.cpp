@@ -3,7 +3,11 @@
 #include <sstream>
 
 Character::Character( const std::string &name, unsigned int player )
-    : _name( name ), _cur_health( 100 ), _textures( name ), _status( IDLE )
+    : _name( name ),
+      _cur_health( 100 ),
+      _player( player ),
+      _textures( name ),
+      _state( IDLE )
 {
   // initialize the current execution_position array to a value not used
   std::fill_n( _execution_position, HIT + 1, 99 );
@@ -18,8 +22,11 @@ Character::~Character( void )
 {
 }
 
-void Character::update( const std::vector<bool> events )
+void Character::update(
+    std::map<events::CHARACTER_EVENT, bool> &character_events )
 {
+  if ( character_events[events::CHARACTER_EVENT::NONE] )
+    return;
 }
 
 unsigned int Character::get_health( void )
@@ -27,15 +34,14 @@ unsigned int Character::get_health( void )
   return _cur_health;
 }
 
-const sf::Vector2f Character::get_position( void )
-{
-  sf::Vector2f pos( _x_pos, _y_pos );
-  return pos;
-}
-
 std::shared_ptr<sf::Texture> Character::get_texture( void )
 {
   return _character_texture;
+}
+
+STATE Character::get_state( void )
+{
+  return _state;
 }
 
 void Character::set_position_counts( const std::string &name )

@@ -1,6 +1,6 @@
 namespace status
 {
-enum STATUS
+enum STATE
 {
   IDLE = 0,
   WALKING = 1,
