@@ -36,9 +36,12 @@ Images::Images( const std::string &name )
   // load all the images into the map
   for ( auto it = _images.begin(); it != _images.end(); ++it )
   {
-    if ( it->second.loadFromFile( "assets/" + name + "/" + it->first +
-                                  ".png" ) )
-      std::cerr << "Error loading image assets/" + name + "/idle1.png\n";
+    std::string file = "assets/" + name + "/" + it->first + ".png";
+    if ( !it->second.loadFromFile( file ) )
+    {
+      std::cerr << "Error loading image: assets/" + name + "/" + it->first
+                << std::endl;
+    }
   }
 }
 
