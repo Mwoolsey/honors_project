@@ -1,9 +1,12 @@
 #ifndef CHAR_SELECT_H
 #define CHAR_SELECT_H
 
-#include <iostream>
+#include <string>
 #include <memory>
+#include <iostream>
+
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
 
 class CharSelect
 {

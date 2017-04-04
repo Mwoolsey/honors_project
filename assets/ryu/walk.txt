@@ -1,0 +1,12 @@
+5 250 100 0 50 100 150 200 50 50 50 50 50
+Sub-images:
+5
+
+Dimensions:
+250px, 100px
+
+Horizontal-offsets:
+0px, 50px, 100px, 150px, 200px
+
+Sub-image widths:
+50px, 50px, 50px, 50px, 50px

@@ -1,9 +1,12 @@
 #ifndef MAIN_MENU_H
 #define MAIN_MENU_H
 
-#include <iostream>
+#include <string>
 #include <memory>
+#include <iostream>
+
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
 
 class MainMenu
 {
