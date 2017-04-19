@@ -2,21 +2,30 @@
 #include <fstream>
 #include <sstream>
 
-Character::Character( const std::string &name, unsigned int player )
-    : _name( name ), _cur_health( 100 ), _textures( name ), _state( IDLE )
+Character::Character( const std::string &name, unsigned int player ) try
+    : _name( name ),
+      _cur_health( 100 ),
+      _textures( name ),
+      _state( IDLE )
 {
   // initialize the current execution_position array to a value not used
   std::fill_n( _execution_position, HIT + 1, 99 );
   // set initial position
   _execution_position[IDLE] = 0;
 
+  // this will be the starting image
   std::string img_name = ( ( player == 1 ) ? "idle1" : "idle2" );
 
+  // set the initial character texture to idle
   _character_texture =
       std::make_shared<sf::Texture>( _textures.get_texture( img_name, 0 ) );
 
   // create the map that holds how many sub images there are per image
   set_position_counts( name );
+}
+catch ( char const *e )
+{
+  throw e;
 }
 
 Character::~Character( void )
@@ -94,6 +103,10 @@ void Character::update( const STATE &state, char facing )
   }
   else  // the new state doesn't match the current state
   {
+    // decrement health if character was hit
+    if ( state == HIT )
+      _cur_health -= 10;
+
     // start the image loop counter for the state we are in
     _execution_position[state] = 0;
     _state = state;

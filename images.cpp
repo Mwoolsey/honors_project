@@ -39,8 +39,7 @@ Images::Images( const std::string &name )
     std::string file = "assets/" + name + "/" + it->first + ".png";
     if ( !it->second.loadFromFile( file ) )
     {
-      std::cerr << "Error loading image: assets/" + name + "/" + it->first
-                << std::endl;
+      throw "Error loading image: assets/" + name + "/" + it->first;
     }
   }
 }

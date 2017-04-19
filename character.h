@@ -41,7 +41,7 @@ class Character
    * This function will update all the current information for the character
    * including: current health, current texture, and current state
    * @param const STATE &state - The new state to be updated to
-   * @param char facing - Which way the character is facing
+   * @param char facing - Which way the character is facing, R or L
    */
   void update( const STATE &state, char facing );
 

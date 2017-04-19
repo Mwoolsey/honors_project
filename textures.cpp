@@ -1,9 +1,20 @@
 #include "textures.h"
 
-Textures::Textures( const std::string &name ) : _images( name )
+Textures::Textures( const std::string &name ) try : _images( name )
 {
-  set_parameters( name );
-  set_textures( name );
+  try
+  {
+    set_parameters( name );
+    set_textures( name );
+  }
+  catch ( char const *e )
+  {
+    throw e;
+  }
+}
+catch ( char const *e )
+{
+  throw e;
 }
 
 sf::Texture Textures::get_texture( const std::string &img_name,

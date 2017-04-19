@@ -3,6 +3,8 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <cstdlib>
+#include <time.h>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
@@ -10,11 +12,33 @@
 #include "message_handler.h"
 #include "main_menu.h"
 #include "char_select.h"
+#include "match.h"
+
+std::string get_character_name( int character_number );
 
 int main( int argc, char* argv[] )
 {
+  if ( argc != 4 )
+  {
+    std::cerr << "Wrong number of arguments\n";
+    return 0;
+  }
   std::string ipaddress = argv[1];  // maybe use boost to validate
   unsigned int port = (unsigned short)std::strtoul( argv[2], NULL, 0 );
+  unsigned int my_player_number, opponent_player_number;
+  std::string server_or_client = argv[3];
+  if ( server_or_client == "S" )
+  {
+    std::cout << "I am server\n";
+    my_player_number = 1;
+    opponent_player_number = 2;
+  }
+  else
+  {
+    std::cout << "I am Client\n";
+    my_player_number = 2;
+    opponent_player_number = 1;
+  }
 
   //  Initialize window settings
   //////////////////////////////////////////////////////////////////////////////
@@ -37,17 +61,19 @@ int main( int argc, char* argv[] )
   waiting.loadFromFile( "assets/waiting.png" );
   /****************************************************************************/
 
-  // create the menu object and pass it the window and texture addresses
-  std::shared_ptr<MainMenu> menu( new MainMenu( window, background ) );
-  std::shared_ptr<CharSelect> char_select(
+  // create the menu objects and pass them the window and texture addresses
+  std::unique_ptr<MainMenu> menu( new MainMenu( window, background ) );
+  std::unique_ptr<CharSelect> char_select(
       new CharSelect( window, background ) );
 
   // start the messenger
   std::shared_ptr<MessageHandler> messenger(
       new MessageHandler( ipaddress, port ) );
 
+  std::string my_character_name;
+  std::string opponent_character_name;
   int selection = 0;
-  bool player2_ready = false;
+  bool opponent_ready = false;
   std::set<unsigned int> my_message;
   std::set<unsigned int> their_message;
   while ( window->isOpen() )
@@ -68,10 +94,10 @@ int main( int argc, char* argv[] )
     window->clear();
     window->draw( wait_bg_sprite );
     window->display();
-    // wait until player 2 is ready
-    while ( !player2_ready )
+    // wait until opponent is ready
+    while ( !opponent_ready )
     {
-      // send message to player 2 that we are ready
+      // send message to opponent that we are ready
       messenger->send_message( my_message );
 
       their_message = messenger->get_message();
@@ -79,8 +105,7 @@ int main( int argc, char* argv[] )
       // check what the message was and handle accordingly
       if ( their_message.count( keys::STARTED ) )
       {
-        std::cout << *their_message.find( keys::STARTED ) << std::endl;
-        player2_ready = true;
+        opponent_ready = true;
         break;
       }
       else if ( their_message.count( keys::EXIT ) )
@@ -102,37 +127,37 @@ int main( int argc, char* argv[] )
 
     // start character selection
     ////////////////////////////////////////////////////////////////////////////
-    player2_ready = false;
+    opponent_ready = false;
     int character = char_select->run();
     if ( character == keys::EXIT )
     {
       window->close();
     }
 
+    my_character_name = get_character_name( character );
+
     background->loadFromImage( waiting );
     window->clear();
     window->draw( wait_bg_sprite );
     window->display();
-    std::cout << "I chose character: " << character << std::endl;
     my_message.insert( character );
     // wait until player 2 is ready
-    while ( !player2_ready )
+    while ( !opponent_ready )
     {
       // send message to player 2 that we are ready
       messenger->send_message( my_message );
 
       their_message.clear();
       their_message = messenger->get_message();
-
       // check what the message was and handle accordingly
       if ( their_message.size() > 0 && their_message.size() < 2 )
       {
         int msg = *their_message.begin();
+        // check valid character range
         if ( msg < 8 && msg >= 0 )
         {
-          std::cout << "Player 2 chose: " << *their_message.begin()
-                    << std::endl;
-          player2_ready = true;
+          opponent_character_name = get_character_name( msg );
+          opponent_ready = true;
           break;
         }
         if ( their_message.count( keys::EXIT ) )
@@ -154,8 +179,22 @@ int main( int argc, char* argv[] )
     }
     ////////////////////////////////////////////////////////////////////////////
 
-    window->close();  // temporary until next phase
-  }                   // window loop
+    try
+    {
+      Match match( window, background, messenger, my_player_number,
+                   opponent_player_number, my_character_name,
+                   opponent_character_name );
+      match.run();
+    }
+    catch ( char const* e )
+    {
+      // need to send message so opponent knows we had an error
+
+      std::cerr << e << std::endl;
+    }
+
+    window->close();
+  }  // end window loop
 
 WINDOW_DONE:
 
@@ -167,4 +206,31 @@ WINDOW_DONE:
   menu.reset();
 
   return 0;
+}
+
+std::string get_character_name( int character_number )
+{
+  std::string name;
+  switch ( character_number )
+  {
+    case 0:
+      return "ryu";
+    case 1:
+      return "blanka";
+    case 2:
+      return "chun-li";
+    case 3:
+      return "fei-long";
+    case 4:
+      return "balrog";
+    case 5:
+      return "cammy";
+    case 6:
+      return "deejay";
+    case 7:
+      return "ken";
+    default:
+      break;
+  }
+  return "ryu";
 }
