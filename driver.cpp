@@ -29,13 +29,11 @@ int main( int argc, char* argv[] )
   std::string server_or_client = argv[3];
   if ( server_or_client == "S" )
   {
-    std::cout << "I am server\n";
     my_player_number = 1;
     opponent_player_number = 2;
   }
   else
   {
-    std::cout << "I am Client\n";
     my_player_number = 2;
     opponent_player_number = 1;
   }
@@ -72,43 +70,95 @@ int main( int argc, char* argv[] )
 
   std::string my_character_name;
   std::string opponent_character_name;
+  sf::Sprite wait_bg_sprite;
+  int character;
   int selection = 0;
   bool opponent_ready = false;
   std::set<unsigned int> my_message;
   std::set<unsigned int> their_message;
-  while ( window->isOpen() )
+  // get what button was pressed. If run() returns a 1 then the program
+  // is to move on.
+  selection = menu->run();
+  if ( selection == keys::EXIT )
   {
-    // get what button was pressed. If run() returns a 1 then the program
-    // is to move on.
-    selection = menu->run();
-    if ( selection == keys::EXIT )
+    window->close();
+    goto WINDOW_DONE;
+  }
+  my_message.insert( keys::STARTED );
+
+  // show waiting background
+  background->loadFromImage( waiting );
+  wait_bg_sprite.setTexture( *background );
+  window->clear();
+  window->draw( wait_bg_sprite );
+  window->display();
+  // wait until opponent is ready
+  while ( !opponent_ready )
+  {
+    // send message to opponent that we are ready
+    messenger->send_message( my_message );
+
+    their_message = messenger->get_message();
+
+    // check what the message was and handle accordingly
+    if ( their_message.count( keys::STARTED ) )
     {
+      opponent_ready = true;
+      break;
+    }
+    else if ( their_message.count( keys::EXIT ) )
+    {
+      // if the other player exits, close local session
+      // for now
+      std::cout << "Player 2 exited\n";
       window->close();
       goto WINDOW_DONE;
     }
-    my_message.insert( keys::STARTED );
+  }
+  my_message.clear();
+  ////////////////////////////////////////////////////////////////////////////
 
-    // show waiting background
-    background->loadFromImage( waiting );
-    sf::Sprite wait_bg_sprite( *background );
-    window->clear();
-    window->draw( wait_bg_sprite );
-    window->display();
-    // wait until opponent is ready
-    while ( !opponent_ready )
+  while ( ( their_message = messenger->get_message() ).size() > 0 )
+  {
+    // get rid of any outstanding messages
+  }
+
+  // start character selection
+  ////////////////////////////////////////////////////////////////////////////
+  opponent_ready = false;
+  character = char_select->run();
+  if ( character == keys::EXIT )
+  {
+    window->close();
+  }
+
+  my_character_name = get_character_name( character );
+
+  background->loadFromImage( waiting );
+  window->clear();
+  window->draw( wait_bg_sprite );
+  window->display();
+  my_message.insert( character );
+  // wait until player 2 is ready
+  while ( !opponent_ready )
+  {
+    // send message to player 2 that we are ready
+    messenger->send_message( my_message );
+
+    their_message.clear();
+    their_message = messenger->get_message();
+    // check what the message was and handle accordingly
+    if ( their_message.size() > 0 && their_message.size() < 2 )
     {
-      // send message to opponent that we are ready
-      messenger->send_message( my_message );
-
-      their_message = messenger->get_message();
-
-      // check what the message was and handle accordingly
-      if ( their_message.count( keys::STARTED ) )
+      int msg = *their_message.begin();
+      // check valid character range
+      if ( msg < 8 && msg >= 0 )
       {
+        opponent_character_name = get_character_name( msg );
         opponent_ready = true;
         break;
       }
-      else if ( their_message.count( keys::EXIT ) )
+      if ( their_message.count( keys::EXIT ) )
       {
         // if the other player exits, close local session
         // for now
@@ -117,86 +167,32 @@ int main( int argc, char* argv[] )
         goto WINDOW_DONE;
       }
     }
-    my_message.clear();
-    ////////////////////////////////////////////////////////////////////////////
+  }
+  my_message.clear();
+  their_message.clear();
 
-    while ( ( their_message = messenger->get_message() ).size() > 0 )
-    {
-      // get rid of any outstanding messages
-    }
+  while ( ( their_message = messenger->get_message() ).size() > 0 )
+  {
+    // get rid of any outstanding messages
+  }
+  ////////////////////////////////////////////////////////////////////////////
 
-    // start character selection
-    ////////////////////////////////////////////////////////////////////////////
-    opponent_ready = false;
-    int character = char_select->run();
-    if ( character == keys::EXIT )
-    {
-      window->close();
-    }
+  try
+  {
+    Match match( window, background, messenger, my_player_number,
+                 opponent_player_number, my_character_name,
+                 opponent_character_name );
+    match.run();
+  }
+  catch ( char const* e )
+  {
+    // need to send message so opponent knows we had an error
 
-    my_character_name = get_character_name( character );
-
-    background->loadFromImage( waiting );
-    window->clear();
-    window->draw( wait_bg_sprite );
-    window->display();
-    my_message.insert( character );
-    // wait until player 2 is ready
-    while ( !opponent_ready )
-    {
-      // send message to player 2 that we are ready
-      messenger->send_message( my_message );
-
-      their_message.clear();
-      their_message = messenger->get_message();
-      // check what the message was and handle accordingly
-      if ( their_message.size() > 0 && their_message.size() < 2 )
-      {
-        int msg = *their_message.begin();
-        // check valid character range
-        if ( msg < 8 && msg >= 0 )
-        {
-          opponent_character_name = get_character_name( msg );
-          opponent_ready = true;
-          break;
-        }
-        if ( their_message.count( keys::EXIT ) )
-        {
-          // if the other player exits, close local session
-          // for now
-          std::cout << "Player 2 exited\n";
-          window->close();
-          goto WINDOW_DONE;
-        }
-      }
-    }
-    my_message.clear();
-    their_message.clear();
-
-    while ( ( their_message = messenger->get_message() ).size() > 0 )
-    {
-      // get rid of any outstanding messages
-    }
-    ////////////////////////////////////////////////////////////////////////////
-
-    try
-    {
-      Match match( window, background, messenger, my_player_number,
-                   opponent_player_number, my_character_name,
-                   opponent_character_name );
-      match.run();
-    }
-    catch ( char const* e )
-    {
-      // need to send message so opponent knows we had an error
-
-      std::cerr << e << std::endl;
-    }
-
-    window->close();
-  }  // end window loop
+    std::cerr << e << std::endl;
+  }
 
 WINDOW_DONE:
+  window->close();
 
   // stop threads from handling messages
   messenger->stop_messages();

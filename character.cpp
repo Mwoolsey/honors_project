@@ -88,7 +88,7 @@ void Character::update( const STATE &state, char facing )
   {
     // if the execution_position is less than max, increment it. Else reset it
     // to IDLE
-    if ( _execution_position[state] < _position_counts[img_name] )
+    if ( _execution_position[state] < _position_counts[img_name] - 1 )
     {
       ++_execution_position[state];
     }

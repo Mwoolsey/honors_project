@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <set>
+#include <unistd.h>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>

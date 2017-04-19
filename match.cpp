@@ -42,13 +42,13 @@ Match::~Match()
 
 void Match::run()
 {
-  std::cout << "Inside run()\n";
+  _window->setFramerateLimit( 5 );
   sf::Sprite background( *_background );
   sf::Sprite me, opponent;
   // run until either player closes the window or the game ends
   while ( ( _my_events.find( keys::EXIT ) == _my_events.end() ) &&
           ( _opponent_events.find( keys::EXIT ) == _opponent_events.end() ) &&
-          ( !_game_over ) )
+          ( !_game_over ) && _window->isOpen() )
   {
     set_events();
 
@@ -61,9 +61,9 @@ void Match::run()
     _window->draw( me );
     _window->draw( opponent );
     _window->display();
+    _my_character->update( status::IDLE, 'R' );
+    _opponent_character->update( status::IDLE, 'L' );
   }
-  _my_character->update( status::IDLE, 'R' );
-  _opponent_character->update( status::IDLE, 'L' );
 }
 
 void Match::set_events()
