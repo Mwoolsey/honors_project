@@ -27,7 +27,7 @@ int main( int argc, char* argv[] )
   unsigned int port = (unsigned short)std::strtoul( argv[2], NULL, 0 );
   unsigned int my_player_number, opponent_player_number;
   std::string server_or_client = argv[3];
-  if ( server_or_client == "S" )
+  if ( server_or_client == "S" || server_or_client == "s" )
   {
     my_player_number = 1;
     opponent_player_number = 2;
@@ -179,6 +179,10 @@ int main( int argc, char* argv[] )
 
   try
   {
+    // start the match
+    //
+    // here we catch any errors that happened so we can inform the opponent and
+    // exit
     Match match( window, background, messenger, my_player_number,
                  opponent_player_number, my_character_name,
                  opponent_character_name );
@@ -186,7 +190,7 @@ int main( int argc, char* argv[] )
   }
   catch ( char const* e )
   {
-    // need to send message so opponent knows we had an error
+    /* need to send message so opponent knows we had an error */
 
     std::cerr << e << std::endl;
   }

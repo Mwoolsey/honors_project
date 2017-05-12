@@ -30,14 +30,19 @@ class Match
   std::shared_ptr<sf::RenderWindow> _window;
   std::shared_ptr<sf::Texture> _background;
   std::shared_ptr<MessageHandler> _messenger;
-  std::unique_ptr<Character> _my_character;
-  std::unique_ptr<Character> _opponent_character;
-  std::shared_ptr<sf::Texture> _my_texture;
-  std::shared_ptr<sf::Texture> _opponent_texture;
-  std::set<unsigned int> _my_events;
-  std::set<unsigned int> _opponent_events;
+  std::unique_ptr<Character> _player1;
+  std::unique_ptr<Character> _player2;
+  bool _player1_events[1000];
+  bool _player2_events[1000];
   bool _game_over;
+  int _my_player_num, _opponent_player_num;
+  float _player1_x_position, _player2_x_position;
+  float _my_y_position, _opponent_y_position;
+  const float _scale_factor;
 
   void set_events();
+  void add_events( const unsigned int player, const unsigned int key );
+  void invoke_events();
+  void update_players();
 };
 #endif /*MATCH_H*/

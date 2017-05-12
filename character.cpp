@@ -45,27 +45,27 @@ void Character::update( const STATE &state, char facing )
     }
     case WALKING:
     {
-      img_name = "walking";
+      img_name = "walk";
       break;
     }
     case JUMPING:
     {
-      img_name = "jumping";
+      img_name = "jump";
       break;
     }
     case PUNCHING:
     {
-      img_name = "punching";
+      img_name = "punch";
       break;
     }
     case KICKING:
     {
-      img_name = "kicking";
+      img_name = "kick";
       break;
     }
     case CROUCHING:
     {
-      img_name = "crouching";
+      img_name = "crouch";
       break;
     }
     case HIT:
@@ -95,20 +95,21 @@ void Character::update( const STATE &state, char facing )
     else  // we have finished the loop of whatever image we are on
     {
       // set the current state to not being used
-      _execution_position[state] = 99;
+      //_execution_position[state] = 99;
       // reset the IDLE state to the beggining of the loop and change to IDLE
-      _execution_position[IDLE] = 0;
-      _state = IDLE;
+      _execution_position[state] = 0;
+      if ( state == HIT )
+        _state = IDLE;
     }
   }
   else  // the new state doesn't match the current state
   {
+    _execution_position[state] = 0;
     // decrement health if character was hit
     if ( state == HIT )
       _cur_health -= 10;
 
     // start the image loop counter for the state we are in
-    _execution_position[state] = 0;
     _state = state;
   }
 
