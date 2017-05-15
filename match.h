@@ -43,6 +43,7 @@ class Match
   const float _scale_factor;
   char _player1_direction, _player2_direction;
   STATE _player1_state, _player2_state;
+  sf::Rect<float> _player1_rect, _player2_rect;
 
   void set_events( void );
   void add_events( const unsigned int player, const unsigned int key );

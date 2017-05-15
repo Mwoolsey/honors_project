@@ -27,15 +27,22 @@ Match::Match( std::shared_ptr<sf::RenderWindow> window,
   if ( !_background->loadFromFile( "assets/StageBackground.png" ) )
     throw "Error loading StageBackground.png";
 
-  this->_player1_sprite = std::unique_ptr<sf::Sprite>( new sf::Sprite() );
-  this->_player2_sprite = std::unique_ptr<sf::Sprite>( new sf::Sprite() );
-
   try
   {
-    this->_player1 =
-        std::unique_ptr<Character>( new Character( my_name, my_player_num ) );
-    this->_player2 = std::unique_ptr<Character>(
-        new Character( opponent_name, opponent_num ) );
+    if ( my_player_num == 1 )
+    {
+      this->_player1 =
+          std::unique_ptr<Character>( new Character( my_name, my_player_num ) );
+      this->_player2 = std::unique_ptr<Character>(
+          new Character( opponent_name, opponent_num ) );
+    }
+    else
+    {
+      this->_player1 = std::unique_ptr<Character>(
+          new Character( opponent_name, my_player_num ) );
+      this->_player2 =
+          std::unique_ptr<Character>( new Character( my_name, opponent_num ) );
+    }
   }
   catch ( char const *e )
   {
@@ -49,11 +56,7 @@ Match::Match( std::shared_ptr<sf::RenderWindow> window,
   _player2_y_position =
       575 - ( _player2->get_texture()->getSize().y * _scale_factor );
 
-  _window->setFramerateLimit( 20 );
-  _player1_sprite->setScale( _player1_sprite->getScale().x * 2.5,
-                             _player1_sprite->getScale().y * 2.5 );
-  _player2_sprite->setScale( _player2_sprite->getScale().x * 2.5,
-                             _player2_sprite->getScale().y * 2.5 );
+  _window->setFramerateLimit( 5 );
 }
 
 Match::~Match()
@@ -70,33 +73,35 @@ void Match::run()
   /****************************************************************************/
 
   sf::Sprite background( *_background );
-
-  int counter = 0;
   // run until either player closes the window or the game ends
   while ( !_player1_events[keys::EXIT] && !_player2_events[keys::EXIT] &&
           !_game_over && _window->isOpen() )
   {
-    if ( !( ++counter % 6 ) )
-    {
-      counter = 0;
-      update_players( _player1_state, _player2_state );
-      set_events();
+    sf::Sprite player1_sprite, player2_sprite;
 
-      // set the current textures
-      _player1_sprite->setTexture( *_player1->get_texture() );
-      _player2_sprite->setTexture( *_player2->get_texture() );
-      _player1_sprite->setPosition( _player1_x_position, _player1_y_position );
-      _player2_sprite->setPosition( _player2_x_position, _player2_y_position );
+    update_players( _player1_state, _player2_state );
+    set_events();
 
-      // update the characters to the new state
-      invoke_events( _player1->get_state(), _player2->get_state() );
-    }
+    // set the current textures
+    player1_sprite.setTexture( *_player1->get_texture() );
+    player2_sprite.setTexture( *_player2->get_texture() );
+    player1_sprite.setPosition( _player1_x_position, _player1_y_position );
+    player2_sprite.setPosition( _player2_x_position, _player2_y_position );
+
+    player1_sprite.setScale( _scale_factor, _scale_factor );
+    player2_sprite.setScale( _scale_factor, _scale_factor );
+
+    _player1_rect = player1_sprite.getGlobalBounds();
+    _player2_rect = player2_sprite.getGlobalBounds();
+
+    // update the characters to the new state
+    invoke_events( _player1->get_state(), _player2->get_state() );
 
     _window->clear();
     // always draw the background first
     _window->draw( background );
-    _window->draw( *_player1_sprite );
-    _window->draw( *_player2_sprite );
+    _window->draw( player1_sprite );
+    _window->draw( player2_sprite );
     _window->display();
   }
 }
@@ -391,8 +396,7 @@ void Match::player2_events( const STATE &p2_state )
 bool Match::collision( void )
 {
   // check for collision
-  if ( _player1_sprite->getGlobalBounds().intersects(
-          _player2_sprite->getGlobalBounds() ) )
+  if ( _player1_rect.intersects( _player2_rect ) )
   {
     return true;
   }
