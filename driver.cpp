@@ -42,8 +42,9 @@ int main( int argc, char* argv[] )
   //////////////////////////////////////////////////////////////////////////////
   int window_width = 1000;
   int window_height = 626;
-  std::shared_ptr<sf::RenderWindow> window( new sf::RenderWindow(
-      sf::VideoMode( window_width, window_height ), "My Window" ) );
+  std::shared_ptr<sf::RenderWindow> window(
+      new sf::RenderWindow( sf::VideoMode( window_width, window_height ),
+                            "Street Figher II", sf::Style::Close ) );
   window->setPosition( sf::Vector2i(
       ( sf::VideoMode::getDesktopMode().width / 2 ) - ( window_width / 2 ),
       ( sf::VideoMode::getDesktopMode().height / 2 ) -
@@ -52,11 +53,23 @@ int main( int argc, char* argv[] )
   window->setFramerateLimit( 60 );
   /****************************************************************************/
 
-  //  Create textures that need to live for the life of the program
+  //  Create texture and image that need to live for the life of the program
   //////////////////////////////////////////////////////////////////////////////
   std::shared_ptr<sf::Texture> background( new sf::Texture );
   sf::Image waiting;
   waiting.loadFromFile( "assets/waiting.png" );
+  sf::Sprite wait_bg_sprite;
+  /****************************************************************************/
+
+  // create variables
+  //////////////////////////////////////////////////////////////////////////////
+  std::string my_character_name;
+  std::string opponent_character_name;
+  int character;
+  int selection = 0;
+  bool opponent_ready = false;
+  std::set<unsigned int> my_message;
+  std::set<unsigned int> their_message;
   /****************************************************************************/
 
   // create the menu objects and pass them the window and texture addresses
@@ -68,14 +81,6 @@ int main( int argc, char* argv[] )
   std::shared_ptr<MessageHandler> messenger(
       new MessageHandler( ipaddress, port ) );
 
-  std::string my_character_name;
-  std::string opponent_character_name;
-  sf::Sprite wait_bg_sprite;
-  int character;
-  int selection = 0;
-  bool opponent_ready = false;
-  std::set<unsigned int> my_message;
-  std::set<unsigned int> their_message;
   // get what button was pressed. If run() returns a 1 then the program
   // is to move on.
   selection = menu->run();

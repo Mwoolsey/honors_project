@@ -22,6 +22,14 @@ Character::Character( const std::string &name, unsigned int player ) try
 
   // create the map that holds how many sub images there are per image
   set_position_counts( name );
+
+  _image_names[IDLE] = "idle";
+  _image_names[WALKING] = "walk";
+  _image_names[JUMPING] = "jump";
+  _image_names[PUNCHING] = "punch";
+  _image_names[KICKING] = "kick";
+  _image_names[CROUCHING] = "crouch";
+  _image_names[HIT] = "hit";
 }
 catch ( char const *e )
 {
@@ -35,47 +43,7 @@ Character::~Character( void )
 void Character::update( const STATE &state, char facing )
 {
   // get the string for the image to match the state
-  std::string img_name;
-  switch ( state )
-  {
-    case IDLE:
-    {
-      img_name = "idle";
-      break;
-    }
-    case WALKING:
-    {
-      img_name = "walk";
-      break;
-    }
-    case JUMPING:
-    {
-      img_name = "jump";
-      break;
-    }
-    case PUNCHING:
-    {
-      img_name = "punch";
-      break;
-    }
-    case KICKING:
-    {
-      img_name = "kick";
-      break;
-    }
-    case CROUCHING:
-    {
-      img_name = "crouch";
-      break;
-    }
-    case HIT:
-    {
-      img_name = "hit";
-      break;
-    }
-    default:
-      break;
-  }
+  std::string img_name = _image_names[state];
 
   // if we are facing right, append a 1 to the img_name, else append a 2
   if ( facing == 'R' )
@@ -98,13 +66,13 @@ void Character::update( const STATE &state, char facing )
       //_execution_position[state] = 99;
       // reset the IDLE state to the beggining of the loop and change to IDLE
       _execution_position[state] = 0;
-      if ( state == HIT )
-        _state = IDLE;
+      _state = IDLE;
     }
   }
   else  // the new state doesn't match the current state
   {
     _execution_position[state] = 0;
+    _execution_position[_state] = 0;
     // decrement health if character was hit
     if ( state == HIT )
       _cur_health -= 10;
@@ -115,7 +83,7 @@ void Character::update( const STATE &state, char facing )
 
   // set the new current texture
   _character_texture = std::make_shared<sf::Texture>(
-      _textures.get_texture( img_name, _execution_position[state] ) );
+      _textures.get_texture( img_name, _execution_position[_state] ) );
 }
 
 unsigned int Character::get_health( void )

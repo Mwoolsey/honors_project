@@ -68,6 +68,8 @@ class Character
   std::string _name;
   unsigned int _cur_health;
   std::shared_ptr<sf::Texture> _character_texture;
+  // right now there are no images above 32
+  std::string _image_names[40];
 
   // an object to hold all the textures for the given character
   Textures _textures;
