@@ -28,39 +28,81 @@ void Textures::set_parameters( const std::string &name )
   unsigned int tmp;
   std::string line;
   std::ifstream file;
-  std::vector<std::string> file_names = {"crouch", "hit",   "idle", "jump",
-                                         "kick",   "punch", "walk"};
-  for ( unsigned int i = 0; i < file_names.size(); ++i )
+  std::vector<std::string> file_names_forward = {
+      "crouch1", "hit1", "idle1", "jump1", "kick1", "punch1", "walk1"};
+  std::vector<std::string> file_names_reverse = {
+      "crouch2", "hit2", "idle2", "jump2", "kick2", "punch2", "walk2"};
+
+  // handle forward facing textures
+  for ( unsigned int i = 0; i < file_names_forward.size(); ++i )
   {
-    file.open( "assets/" + name + "/" + file_names[i] + ".txt" );
+    file.open( "assets/" + name + "/" + file_names_forward[i] + ".txt" );  //
     if ( file.is_open() )
     {
       std::getline( file, line );
       std::stringstream ss( line );
 
       ss >> tmp;
-      _image_counts.push_back( tmp );
+      _image_counts.push_back( tmp );  //
       ss >> tmp;
-      _widths.push_back( tmp );
+      _widths.push_back( tmp );  //
       ss >> tmp;
-      _heights.push_back( tmp );
-      _offsets.push_back( std::vector<unsigned int>() );
+      _heights.push_back( tmp );  //
+      _forward_offsets.push_back( std::vector<unsigned int>() );
       for ( unsigned int j = 0; j < _image_counts[i]; ++j )
       {
         ss >> tmp;
-        _offsets[i].push_back( tmp );
+        _forward_offsets[i].push_back( tmp );
       }
-      _sub_widths.push_back( std::vector<unsigned int>() );
+      _forward_sub_widths.push_back( std::vector<unsigned int>() );
       for ( unsigned int j = 0; j < _image_counts[i]; ++j )
       {
         ss >> tmp;
-        _sub_widths[i].push_back( tmp );
+        _forward_sub_widths[i].push_back( tmp );
       }
     }
     else
     {
       file.close();
-      throw "Error opening " + file_names[i] + ".txt";
+      throw "Error opening " + file_names_forward[i] + ".txt";
+    }
+    file.close();
+  }
+
+  // handle reverse facing textures
+  for ( unsigned int i = 0; i < file_names_reverse.size(); ++i )
+  {
+    file.open( "assets/" + name + "/" + file_names_reverse[i] + ".txt" );  //
+    if ( file.is_open() )
+    {
+      std::getline( file, line );
+      std::stringstream ss( line );
+
+      // don't need to change image counts, widths isn't used right now, and
+      // heights are the same
+      ss >> tmp;
+      //_image_counts.push_back( tmp );
+      ss >> tmp;
+      //_widths.push_back( tmp );//
+      ss >> tmp;
+      //_heights.push_back( tmp );//
+      _reverse_offsets.push_back( std::vector<unsigned int>() );
+      for ( unsigned int j = 0; j < _image_counts[i]; ++j )
+      {
+        ss >> tmp;
+        _reverse_offsets[i].push_back( tmp );
+      }
+      _reverse_sub_widths.push_back( std::vector<unsigned int>() );
+      for ( unsigned int j = 0; j < _image_counts[i]; ++j )
+      {
+        ss >> tmp;
+        _reverse_sub_widths[i].push_back( tmp );
+      }
+    }
+    else
+    {
+      file.close();
+      throw "Error opening " + file_names_reverse[i] + ".txt";
     }
     file.close();
   }
@@ -90,7 +132,7 @@ void Textures::set_textures( const std::string &name )
     _textures["crouch1"].push_back( sf::Texture() );
     if ( !_textures["crouch1"].back().loadFromImage(
               _images.get_image( "crouch1" ),
-              sf::IntRect( _offsets[0][i], 0, _sub_widths[0][i],
+              sf::IntRect( _forward_offsets[0][i], 0, _forward_sub_widths[0][i],
                            _heights[0] ) ) )
     {
       throw "Error loading crouch1 texture: " + i;
@@ -100,7 +142,7 @@ void Textures::set_textures( const std::string &name )
     _textures["crouch2"].push_back( sf::Texture() );
     if ( !_textures["crouch2"].back().loadFromImage(
               _images.get_image( "crouch2" ),
-              sf::IntRect( _offsets[0][i], 0, _sub_widths[0][i],
+              sf::IntRect( _reverse_offsets[0][i], 0, _reverse_sub_widths[0][i],
                            _heights[0] ) ) )
     {
       throw "Error loading crouch2 texture: " + i;
@@ -114,7 +156,7 @@ void Textures::set_textures( const std::string &name )
     _textures["hit1"].push_back( sf::Texture() );
     if ( !_textures["hit1"].back().loadFromImage(
               _images.get_image( "hit1" ),
-              sf::IntRect( _offsets[1][i], 0, _sub_widths[1][i],
+              sf::IntRect( _forward_offsets[1][i], 0, _forward_sub_widths[1][i],
                            _heights[1] ) ) )
     {
       throw "Error loading hit1 texture: " + i;
@@ -122,10 +164,10 @@ void Textures::set_textures( const std::string &name )
 
     // handle the 2's
     _textures["hit2"].push_back( sf::Texture() );
-    if ( !_textures["hit2"][i]
-              .loadFromImage( _images.get_image( "hit2" ),
-                              sf::IntRect( _offsets[1][i], 0, _sub_widths[1][i],
-                                           _heights[1] ) ) )
+    if ( !_textures["hit2"][i].loadFromImage(
+              _images.get_image( "hit2" ),
+              sf::IntRect( _reverse_offsets[1][i], 0, _reverse_sub_widths[1][i],
+                           _heights[1] ) ) )
     {
       throw "Error loading hit2 texture: " + i;
     }
@@ -136,20 +178,20 @@ void Textures::set_textures( const std::string &name )
   {
     // handle the 1's
     _textures["idle1"].push_back( sf::Texture() );
-    if ( !_textures["idle1"][i]
-              .loadFromImage( _images.get_image( "idle1" ),
-                              sf::IntRect( _offsets[2][i], 0, _sub_widths[2][i],
-                                           _heights[2] ) ) )
+    if ( !_textures["idle1"][i].loadFromImage(
+              _images.get_image( "idle1" ),
+              sf::IntRect( _forward_offsets[2][i], 0, _forward_sub_widths[2][i],
+                           _heights[2] ) ) )
     {
       throw "Error loading idle1 texture: " + i;
     }
 
     // handle the 2's
     _textures["idle2"].push_back( sf::Texture() );
-    if ( !_textures["idle2"][i]
-              .loadFromImage( _images.get_image( "idle2" ),
-                              sf::IntRect( _offsets[2][i], 0, _sub_widths[2][i],
-                                           _heights[2] ) ) )
+    if ( !_textures["idle2"][i].loadFromImage(
+              _images.get_image( "idle2" ),
+              sf::IntRect( _reverse_offsets[2][i], 0, _reverse_sub_widths[2][i],
+                           _heights[2] ) ) )
     {
       throw "Error loading idle2 texture: " + i;
     }
@@ -160,20 +202,20 @@ void Textures::set_textures( const std::string &name )
   {
     // handle the 1's
     _textures["jump1"].push_back( sf::Texture() );
-    if ( !_textures["jump1"][i]
-              .loadFromImage( _images.get_image( "jump1" ),
-                              sf::IntRect( _offsets[3][i], 0, _sub_widths[3][i],
-                                           _heights[3] ) ) )
+    if ( !_textures["jump1"][i].loadFromImage(
+              _images.get_image( "jump1" ),
+              sf::IntRect( _forward_offsets[3][i], 0, _forward_sub_widths[3][i],
+                           _heights[3] ) ) )
     {
       throw "Error loading jump1 texture: " + i;
     }
 
     // handle the 2's
     _textures["jump2"].push_back( sf::Texture() );
-    if ( !_textures["jump2"][i]
-              .loadFromImage( _images.get_image( "jump2" ),
-                              sf::IntRect( _offsets[3][i], 0, _sub_widths[3][i],
-                                           _heights[3] ) ) )
+    if ( !_textures["jump2"][i].loadFromImage(
+              _images.get_image( "jump2" ),
+              sf::IntRect( _reverse_offsets[3][i], 0, _reverse_sub_widths[3][i],
+                           _heights[3] ) ) )
     {
       throw "Error loading jump2 texture: " + i;
     }
@@ -184,20 +226,20 @@ void Textures::set_textures( const std::string &name )
   {
     // handle the 1's
     _textures["kick1"].push_back( sf::Texture() );
-    if ( !_textures["kick1"][i]
-              .loadFromImage( _images.get_image( "kick1" ),
-                              sf::IntRect( _offsets[4][i], 0, _sub_widths[4][i],
-                                           _heights[4] ) ) )
+    if ( !_textures["kick1"][i].loadFromImage(
+              _images.get_image( "kick1" ),
+              sf::IntRect( _forward_offsets[4][i], 0, _forward_sub_widths[4][i],
+                           _heights[4] ) ) )
     {
       throw "Error loading kick1 texture: " + i;
     }
 
     // handle the 2's
     _textures["kick2"].push_back( sf::Texture() );
-    if ( !_textures["kick2"][i]
-              .loadFromImage( _images.get_image( "kick2" ),
-                              sf::IntRect( _offsets[4][i], 0, _sub_widths[4][i],
-                                           _heights[4] ) ) )
+    if ( !_textures["kick2"][i].loadFromImage(
+              _images.get_image( "kick2" ),
+              sf::IntRect( _reverse_offsets[4][i], 0, _reverse_sub_widths[4][i],
+                           _heights[4] ) ) )
     {
       throw "Error loading kick2 texture: " + i;
     }
@@ -208,20 +250,20 @@ void Textures::set_textures( const std::string &name )
   {
     // handle the 1's
     _textures["punch1"].push_back( sf::Texture() );
-    if ( !_textures["punch1"][i]
-              .loadFromImage( _images.get_image( "punch1" ),
-                              sf::IntRect( _offsets[5][i], 0, _sub_widths[5][i],
-                                           _heights[5] ) ) )
+    if ( !_textures["punch1"][i].loadFromImage(
+              _images.get_image( "punch1" ),
+              sf::IntRect( _forward_offsets[5][i], 0, _forward_sub_widths[5][i],
+                           _heights[5] ) ) )
     {
       throw "Error loading punch1 texture: " + i;
     }
 
     // handle the 2's
     _textures["punch2"].push_back( sf::Texture() );
-    if ( !_textures["punch2"][i]
-              .loadFromImage( _images.get_image( "punch2" ),
-                              sf::IntRect( _offsets[5][i], 0, _sub_widths[5][i],
-                                           _heights[5] ) ) )
+    if ( !_textures["punch2"][i].loadFromImage(
+              _images.get_image( "punch2" ),
+              sf::IntRect( _reverse_offsets[5][i], 0, _reverse_sub_widths[5][i],
+                           _heights[5] ) ) )
     {
       throw "Error loading punch2 texture: " + i;
     }
@@ -233,20 +275,20 @@ void Textures::set_textures( const std::string &name )
   {
     // handle the 1's
     _textures["walk1"].push_back( sf::Texture() );
-    if ( !_textures["walk1"][i]
-              .loadFromImage( _images.get_image( "walk1" ),
-                              sf::IntRect( _offsets[6][i], 0, _sub_widths[6][i],
-                                           _heights[6] ) ) )
+    if ( !_textures["walk1"][i].loadFromImage(
+              _images.get_image( "walk1" ),
+              sf::IntRect( _forward_offsets[6][i], 0, _forward_sub_widths[6][i],
+                           _heights[6] ) ) )
     {
       throw "Error loading walk1 texture: " + i;
     }
 
     // handle the 2's
     _textures["walk2"].push_back( sf::Texture() );
-    if ( !_textures["walk2"][i]
-              .loadFromImage( _images.get_image( "walk2" ),
-                              sf::IntRect( _offsets[6][i], 0, _sub_widths[6][i],
-                                           _heights[6] ) ) )
+    if ( !_textures["walk2"][i].loadFromImage(
+              _images.get_image( "walk2" ),
+              sf::IntRect( _reverse_offsets[6][i], 0, _reverse_sub_widths[6][i],
+                           _heights[6] ) ) )
     {
       throw "Error loading walk2 texture: " + i;
     }
