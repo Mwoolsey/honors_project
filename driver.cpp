@@ -213,6 +213,10 @@ WINDOW_DONE:
   {
     std::cout << "Player 2 was the winner\n";
   }
+  else if ( winner == 3 )
+  {
+    std::cout << "Time ran out, no winner\n";
+  }
   else
   {
     std::cerr << "Error: No winner\n";

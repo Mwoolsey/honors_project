@@ -15,6 +15,7 @@ Match::Match( std::shared_ptr<sf::RenderWindow> window,
       _game_over( false ),
       _my_player_num( my_player_num ),
       _opponent_player_num( opponent_num ),
+      _timer( 99 ),
       _player1_x_position( 250 ),
       _player2_x_position( 650 ),
       _scale_factor( 2.5 ),
@@ -30,10 +31,16 @@ Match::Match( std::shared_ptr<sf::RenderWindow> window,
   // set font for names
   _player1_name.setFont( _font );
   _player2_name.setFont( _font );
+  _timer_text.setFont( _font );
+  _timer_text.setPosition( 485, 35 );
 
   // load the background texture
   if ( !_background->loadFromFile( "assets/StageBackground.png" ) )
     throw "Error loading StageBackground.png";
+
+  // load the match soundtrack
+  if ( !_stage_music.openFromFile( "assets/sounds/stage.ogg" ) )
+    throw "Error loading soundtrack";
 
   // create the characters
   try
@@ -103,11 +110,27 @@ int Match::run()
     _messenger->get_message();
   /****************************************************************************/
 
+  _stage_music.play();
+
   sf::Sprite background( *_background );
+  sf::Clock clock;
+  int counter;
   // run until either player closes the window or the game ends
   while ( !_player1_events[keys::EXIT] && !_player2_events[keys::EXIT] &&
           !_game_over && _window->isOpen() )
   {
+    if ( _timer == 0 )
+      return 3;
+    // get the time that has passed as seconds, and if a second has passed then
+    // decrement the timer and restart the clock
+    counter = clock.getElapsedTime().asSeconds();
+    if ( counter )
+    {
+      --_timer;
+      clock.restart();
+    }
+    _timer_text.setString( std::to_string( _timer ) );
+
     sf::Sprite player1_sprite, player2_sprite;
 
     update_players( _player1_state, _player2_state );
@@ -148,6 +171,7 @@ int Match::run()
     _window->draw( _player2_name );
     _window->draw( *_player1_healthbar );
     _window->draw( *_player2_healthbar );
+    _window->draw( _timer_text );
     _window->draw( player1_sprite );
     _window->draw( player2_sprite );
     _window->display();

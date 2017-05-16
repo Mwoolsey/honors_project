@@ -10,6 +10,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
+#include <SFML/Audio.hpp>
 #include "message_handler.h"
 
 #include "character.h"
@@ -36,6 +37,7 @@ class Match
   bool _player2_events[1000];
   bool _game_over;
   int _my_player_num, _opponent_player_num;
+  unsigned int _timer;
   float _player1_x_position, _player2_x_position;
   float _player1_y_position, _player2_y_position;
   const float _scale_factor;
@@ -47,7 +49,9 @@ class Match
   float _player1_health, _player2_health;
   sf::Text _player1_name;
   sf::Text _player2_name;
+  sf::Text _timer_text;
   sf::Font _font;
+  sf::Music _stage_music;
 
   void set_events( void );
   void add_events( const unsigned int player, const unsigned int key );
