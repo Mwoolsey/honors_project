@@ -54,13 +54,16 @@ class Character
   /*
    * This function is used to get the current texture that the character is
    * using
+   *
    * @return shared_ptr<Texture> - The characters current texture
    */
   std::shared_ptr<sf::Texture> get_texture( void );
 
   /*
    * This function is used to get the current state that the character is in
-   * @return STATE - The current state of the character
+   *
+   * @return pair<STATE, unsigned int> - The current state of the character and
+   *                                      what texture of that state we are in
    */
   std::pair<STATE, unsigned int> get_state( void );
 

@@ -12,8 +12,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 #include <SFML/Audio.hpp>
-#include "message_handler.h"
 
+#include "message_handler.h"
 #include "character.h"
 
 class Match
@@ -26,20 +26,36 @@ class Match
          const std::string &opponent_name );
   ~Match( void );
 
+  /*
+   * This function is the main loop for a match. It is the driver of all the
+   * other functions.
+   *
+   * @return int run - The winner, if any, of the match.
+   *                  0: Window closed
+   *                  1: Player 1 wins
+   *                  2: Player 2 wins
+   *                  3: Time ran out
+   */
   int run( void );
 
  private:
+  // the main window and the background
   std::shared_ptr<sf::RenderWindow> _window;
   std::shared_ptr<sf::Texture> _background;
+  // this is where the messages are handled
   std::shared_ptr<MessageHandler> _messenger;
+  // the characters
   std::unique_ptr<Character> _player1;
   std::unique_ptr<Character> _player2;
+  // healthbars
   std::unique_ptr<sf::RectangleShape> _player1_healthbar;
   std::unique_ptr<sf::RectangleShape> _player2_healthbar;
+  // this is where the events are stored for quick lookup
   bool _player1_events[1000];
   bool _player2_events[1000];
-  bool _game_over;
+  // the player numbers for setup
   int _my_player_num, _opponent_player_num;
+  // the timer value
   unsigned int _timer;
 
   // these are for positioning the sprites

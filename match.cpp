@@ -12,7 +12,6 @@ Match::Match( std::shared_ptr<sf::RenderWindow> window,
     : _window( window ),
       _background( background ),
       _messenger( messenger ),
-      _game_over( false ),
       _my_player_num( my_player_num ),
       _opponent_player_num( opponent_num ),
       _timer( 99 ),
@@ -120,10 +119,12 @@ int Match::run()
   int counter;
   // run until either player closes the window or the game ends
   while ( !_player1_events[keys::EXIT] && !_player2_events[keys::EXIT] &&
-          !_game_over && _window->isOpen() )
+          _window->isOpen() )
   {
+    // check if the timer has run out
     if ( _timer == 0 )
       return 3;
+
     // get the time that has passed as seconds, and if a second has passed then
     // decrement the timer and restart the clock
     counter = clock.getElapsedTime().asSeconds();
@@ -134,12 +135,16 @@ int Match::run()
     }
     _timer_text.setString( std::to_string( _timer ) );
 
+    // create the sprites that will be drawn to the screen
     sf::Sprite player1_sprite, player2_sprite;
 
+    // handle any events that have happened
     update_players( _player1_state, _player2_state );
 
+    // update the heathbars if needed
     set_healthbars();
 
+    // check if match has been won
     if ( _player1_health <= 0 )
     {
       return 2;
@@ -184,6 +189,7 @@ int Match::run()
 
 void Match::set_events()
 {
+  // messages
   std::set<unsigned int> my_message;
   std::set<unsigned int> their_message;
 
@@ -195,7 +201,7 @@ void Match::set_events()
   }
 
   sf::Event event;
-  // get all of my events
+  // get all of my events and insert them into the message set
   while ( _window->pollEvent( event ) )
   {
     switch ( event.type )
@@ -253,20 +259,20 @@ void Match::set_events()
 
   // send my events
   _messenger->send_message( my_message );
+  // add my events to the boolean array
   for ( auto iter = my_message.begin(); iter != my_message.end(); ++iter )
     add_events( _my_player_num, *iter );
 
   // get opponents events
   their_message = _messenger->get_message();
-
+  // add opponent events to the boolean array
   for ( auto iter = their_message.begin(); iter != their_message.end(); ++iter )
     add_events( _opponent_player_num, *iter );
-
-  // print_opponent_events();
 }
 
 void Match::add_events( const unsigned int player, const unsigned int key )
 {
+  // add the event to array of booleans
   if ( player == 1 )
     _player1_events[key] = true;
   else
@@ -304,15 +310,19 @@ void Match::invoke_events( const STATE &p1_state, const STATE &p2_state )
     player1_events( p1_state );
     player2_events( p2_state );
   }
+
+  // make sure players stay in bounds
   check_boundaries();
 }
 
 void Match::update_players( const STATE &p1_state, const STATE &p2_state )
 {
+  // update the characters to the new state
   _player1->update( p1_state, _player1_direction );
   _player2->update( p2_state, _player2_direction );
 }
 
+// just for debug
 void Match::print_opponent_events( void )
 {
   for ( unsigned int i = 0; i < 1000; ++i )
@@ -332,6 +342,7 @@ void Match::print_opponent_events( void )
 
 void Match::handle_hit( unsigned int player )
 {
+  // if a player goes into the hit state then update x position values
   if ( player == 1 )
   {
     if ( _player1_direction == 'R' )
@@ -366,6 +377,7 @@ int Match::check_attacks( const STATE &p1_state, const STATE &p2_state )
     // dont bother checking attacking states if there is no collision
     if ( collision() )
     {
+      // player 1 is attacking and player 2 is available to be attacked
       if ( player1_attacking &&
            ( p2_state != STATE::HIT && !player2_attacking ) )
       {
@@ -373,6 +385,7 @@ int Match::check_attacks( const STATE &p1_state, const STATE &p2_state )
         _player1_state = p1_state;
         return 3;
       }
+      // player 2 is attacking and player 1 is available to be attacked
       else if ( player2_attacking &&
                 ( p1_state != STATE::HIT && !player1_attacking ) )
       {
@@ -381,6 +394,8 @@ int Match::check_attacks( const STATE &p1_state, const STATE &p2_state )
         return 3;
       }
     }
+
+    // nobody was hit but we still need to update the states
     if ( _player1_events[keys::LMOUSE] )
     {
       _player1_state = STATE::PUNCHING;
@@ -510,6 +525,7 @@ void Match::set_healthbars( void )
 
 void Match::check_boundaries( void )
 {
+  // don't let the players walk off the screen
   if ( _player1_x_position <= 0 )
     _player1_x_position = 0;
   else if ( _player1_x_position >= ( 1000 - _player1_rect.width ) )
@@ -522,6 +538,7 @@ void Match::check_boundaries( void )
 
 void Match::invoke_jump( int player )
 {
+  // update the y position of the player based on what image offset we are at
   if ( player == 1 )
     _player1_y_position -= _player1_jump_offsets[_player1->get_state().second];
   else
@@ -530,6 +547,7 @@ void Match::invoke_jump( int player )
 
 void Match::set_jump_offsets()
 {
+  // make sure the vectors are clear
   _player1_jump_offsets.clear();
   _player2_jump_offsets.clear();
 
@@ -544,25 +562,32 @@ void Match::set_jump_offsets()
   std::ifstream ifs;
   ifs.open( p1_file );
   if ( !ifs.is_open() )
-    std::cout << "File not opened\n";
+    throw "File not opened";
   std::string line;
   getline( ifs, line );
   std::stringstream s1( line );
+  // grab the number of offsets
   s1 >> count;
   for ( int i = 0; i < count; ++i )
   {
+    // put each offset onto the vector
     int tmp;
     s1 >> tmp;
     _player1_jump_offsets.push_back( tmp );
   }
   ifs.close();
 
+  // get player 2 jump offsets
   ifs.open( p2_file );
+  if ( !ifs.is_open() )
+    throw "File not opened";
   getline( ifs, line );
   std::stringstream s2( line );
+  // grab the number of offsets
   s2 >> count;
   for ( int i = 0; i < count; ++i )
   {
+    // put each offset onto the vector
     int tmp;
     s2 >> tmp;
     _player2_jump_offsets.push_back( tmp );
