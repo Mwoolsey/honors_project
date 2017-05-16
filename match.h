@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <memory>
 #include <set>
@@ -33,20 +34,34 @@ class Match
   std::shared_ptr<MessageHandler> _messenger;
   std::unique_ptr<Character> _player1;
   std::unique_ptr<Character> _player2;
+  std::unique_ptr<sf::RectangleShape> _player1_healthbar;
+  std::unique_ptr<sf::RectangleShape> _player2_healthbar;
   bool _player1_events[1000];
   bool _player2_events[1000];
   bool _game_over;
   int _my_player_num, _opponent_player_num;
   unsigned int _timer;
+
+  // these are for positioning the sprites
   float _player1_x_position, _player2_x_position;
   float _player1_y_position, _player2_y_position;
+
+  // this is how much bigger I want the sprites than the original images
   const float _scale_factor;
+  // direction the players are facing: 'R' or 'L'
   char _player1_direction, _player2_direction;
+  // what the current state of the players are
   STATE _player1_state, _player2_state;
-  sf::Rect<float> _player1_rect, _player2_rect;
-  std::unique_ptr<sf::RectangleShape> _player1_healthbar;
-  std::unique_ptr<sf::RectangleShape> _player2_healthbar;
+  // player health
   float _player1_health, _player2_health;
+
+  // these hold the increment values for jumping
+  std::vector<int> _player1_jump_offsets;
+  std::vector<int> _player2_jump_offsets;
+
+  // the current rectangle locations of the players
+  sf::Rect<float> _player1_rect, _player2_rect;
+  // sfml text to send to the screen
   sf::Text _player1_name;
   sf::Text _player2_name;
   sf::Text _timer_text;
@@ -67,5 +82,7 @@ class Match
   bool collision( void );
   void set_healthbars( void );
   void check_boundaries( void );
+  void invoke_jump( int player );
+  void set_jump_offsets( void );
 };
 #endif /*MATCH_H*/

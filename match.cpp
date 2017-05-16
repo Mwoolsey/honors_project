@@ -94,6 +94,9 @@ Match::Match( std::shared_ptr<sf::RenderWindow> window,
   _player2_healthbar->setFillColor( sf::Color::Yellow );
   _player2_health = _player2->get_health();
 
+  // load the jump offsets from the respective files
+  set_jump_offsets();
+
   _window->setFramerateLimit( 5 );
 }
 
@@ -162,7 +165,7 @@ int Match::run()
     _player2_rect = player2_sprite.getGlobalBounds();
 
     // update the characters to the new state
-    invoke_events( _player1->get_state(), _player2->get_state() );
+    invoke_events( _player1->get_state().first, _player2->get_state().first );
 
     _window->clear();
     // always draw the background first
@@ -405,29 +408,34 @@ int Match::check_attacks( const STATE &p1_state, const STATE &p2_state )
 void Match::player1_events( const STATE &p1_state )
 {
   bool moving = false;
-  if ( p1_state == STATE::WALKING || p1_state == STATE::IDLE ||
-       p1_state == STATE::JUMPING )
+
+  // check which keys were pressed and handle accordingly
+  if ( _player1_events[keys::AKEY] )
   {
-    if ( _player1_events[0] )
-    {
-      _player1_x_position -= 14;
-      moving = true;
-    }
-    else if ( _player1_events[2] )
-    {
-      _player1_x_position += 14;
-      moving = true;
-    }
-    if ( _player1_events[keys::SPACEKEY] )
-      _player1_state = STATE::JUMPING;
-    else if ( p1_state == STATE::WALKING || p1_state == STATE::JUMPING )
-      _player1_state = p1_state;
-    else if ( moving )
-      _player1_state = STATE::WALKING;
-    else
-      _player1_state = STATE::IDLE;
+    _player1_x_position -= 14;
+    moving = true;
   }
-  // check player directions
+  if ( _player1_events[keys::DKEY] )
+  {
+    _player1_x_position += 14;
+    moving = true;
+  }
+  if ( _player1_events[keys::SPACEKEY] )
+    _player1_state = STATE::JUMPING;
+  else if ( p1_state == STATE::WALKING || p1_state == STATE::JUMPING )
+    _player1_state = p1_state;
+  else if ( moving )
+    _player1_state = STATE::WALKING;
+  else
+    _player1_state = STATE::IDLE;
+
+  // check if either player is jumping
+  if ( _player1_state == STATE::JUMPING )
+    invoke_jump( 1 );
+  else
+    _player1_y_position =
+        575 - ( _player1->get_texture()->getSize().y * _scale_factor );
+  //  set player directions. This happens once so dont run in player2_events
   if ( _player1_x_position > _player2_x_position )
   {
     _player1_direction = 'L';
@@ -443,28 +451,33 @@ void Match::player1_events( const STATE &p1_state )
 void Match::player2_events( const STATE &p2_state )
 {
   bool moving = false;
-  if ( p2_state == STATE::WALKING || p2_state == STATE::IDLE ||
-       p2_state == STATE::JUMPING )
+
+  // check which keys were pressed and handle accordingly
+  if ( _player2_events[keys::AKEY] )
   {
-    if ( _player2_events[0] )
-    {
-      _player2_x_position -= 14;
-      moving = true;
-    }
-    else if ( _player2_events[2] )
-    {
-      _player2_x_position += 14;
-      moving = true;
-    }
-    if ( _player2_events[keys::SPACEKEY] )
-      _player2_state = STATE::JUMPING;
-    else if ( p2_state == STATE::WALKING || p2_state == STATE::JUMPING )
-      _player2_state = p2_state;
-    else if ( moving )
-      _player2_state = STATE::WALKING;
-    else
-      _player2_state = STATE::IDLE;
+    _player2_x_position -= 14;
+    moving = true;
   }
+  if ( _player2_events[keys::DKEY] )
+  {
+    _player2_x_position += 14;
+    moving = true;
+  }
+  if ( _player2_events[keys::SPACEKEY] )
+    _player2_state = STATE::JUMPING;
+  else if ( p2_state == STATE::WALKING || p2_state == STATE::JUMPING )
+    _player2_state = p2_state;
+  else if ( moving )
+    _player2_state = STATE::WALKING;
+  else
+    _player2_state = STATE::IDLE;
+
+  // check if either player is jumping
+  if ( _player2_state == STATE::JUMPING )
+    invoke_jump( 2 );
+  else
+    _player2_y_position =
+        575 - ( _player2->get_texture()->getSize().y * _scale_factor );
 }
 
 bool Match::collision( void )
@@ -479,18 +492,16 @@ bool Match::collision( void )
 
 void Match::set_healthbars( void )
 {
-  // if health has been changed then update
+  // if health has been changed then update health bars
   if ( _player1_health > _player1->get_health() )
   {
     _player1_health = _player1->get_health();
-    std::cout << "Player1 health: " << _player1_health << std::endl;
     float p1_scale = _player1_health / 100.0;
     _player1_healthbar->setScale( p1_scale, 1 );
   }
-  else if ( _player2_health > _player2->get_health() )
+  if ( _player2_health > _player2->get_health() )
   {
     _player2_health = _player2->get_health();
-    std::cout << "Player2 health: " << _player2_health << std::endl;
     float p2_scale = _player2_health / 100.0;
     _player2_healthbar->setScale( p2_scale, 1 );
     _player2_healthbar->move( 30, 0 );
@@ -507,4 +518,54 @@ void Match::check_boundaries( void )
     _player2_x_position = 0;
   else if ( _player2_x_position >= ( 1000 - _player2_rect.width ) )
     _player2_x_position = 1000 - _player2_rect.width;
+}
+
+void Match::invoke_jump( int player )
+{
+  if ( player == 1 )
+    _player1_y_position -= _player1_jump_offsets[_player1->get_state().second];
+  else
+    _player2_y_position -= _player2_jump_offsets[_player2->get_state().second];
+}
+
+void Match::set_jump_offsets()
+{
+  _player1_jump_offsets.clear();
+  _player2_jump_offsets.clear();
+
+  // variable for how many jump images there are
+  int count;
+  // create the file paths to open
+  std::string p1_file =
+      "assets/" + _player1_name.getString() + "/jump_offsets.txt";
+  std::string p2_file =
+      "assets/" + _player2_name.getString() + "/jump_offsets.txt";
+
+  std::ifstream ifs;
+  ifs.open( p1_file );
+  if ( !ifs.is_open() )
+    std::cout << "File not opened\n";
+  std::string line;
+  getline( ifs, line );
+  std::stringstream s1( line );
+  s1 >> count;
+  for ( int i = 0; i < count; ++i )
+  {
+    int tmp;
+    s1 >> tmp;
+    _player1_jump_offsets.push_back( tmp );
+  }
+  ifs.close();
+
+  ifs.open( p2_file );
+  getline( ifs, line );
+  std::stringstream s2( line );
+  s2 >> count;
+  for ( int i = 0; i < count; ++i )
+  {
+    int tmp;
+    s2 >> tmp;
+    _player2_jump_offsets.push_back( tmp );
+  }
+  ifs.close();
 }

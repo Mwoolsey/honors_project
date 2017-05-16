@@ -96,9 +96,9 @@ std::shared_ptr<sf::Texture> Character::get_texture( void )
   return _character_texture;
 }
 
-STATE Character::get_state( void )
+std::pair<STATE, unsigned int> Character::get_state( void )
 {
-  return _state;
+  return std::make_pair( _state, _execution_position[_state] );
 }
 
 void Character::set_position_counts( const std::string &name )

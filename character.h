@@ -62,7 +62,7 @@ class Character
    * This function is used to get the current state that the character is in
    * @return STATE - The current state of the character
    */
-  STATE get_state( void );
+  std::pair<STATE, unsigned int> get_state( void );
 
  private:
   std::string _name;
