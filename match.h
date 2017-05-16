@@ -24,7 +24,7 @@ class Match
          const std::string &opponent_name );
   ~Match( void );
 
-  void run( void );
+  int run( void );
 
  private:
   std::shared_ptr<sf::RenderWindow> _window;
@@ -32,8 +32,6 @@ class Match
   std::shared_ptr<MessageHandler> _messenger;
   std::unique_ptr<Character> _player1;
   std::unique_ptr<Character> _player2;
-  std::unique_ptr<sf::Sprite> _player1_sprite;
-  std::unique_ptr<sf::Sprite> _player2_sprite;
   bool _player1_events[1000];
   bool _player2_events[1000];
   bool _game_over;
@@ -44,6 +42,12 @@ class Match
   char _player1_direction, _player2_direction;
   STATE _player1_state, _player2_state;
   sf::Rect<float> _player1_rect, _player2_rect;
+  std::unique_ptr<sf::RectangleShape> _player1_healthbar;
+  std::unique_ptr<sf::RectangleShape> _player2_healthbar;
+  float _player1_health, _player2_health;
+  sf::Text _player1_name;
+  sf::Text _player2_name;
+  sf::Font _font;
 
   void set_events( void );
   void add_events( const unsigned int player, const unsigned int key );
@@ -57,5 +61,7 @@ class Match
   void player1_events( const STATE &p1_state );
   void player2_events( const STATE &p2_state );
   bool collision( void );
+  void set_healthbars( void );
+  void check_boundaries( void );
 };
 #endif /*MATCH_H*/

@@ -182,6 +182,8 @@ int main( int argc, char* argv[] )
   }
   ////////////////////////////////////////////////////////////////////////////
 
+  int winner;
+
   try
   {
     // start the match
@@ -191,7 +193,7 @@ int main( int argc, char* argv[] )
     Match match( window, background, messenger, my_player_number,
                  opponent_player_number, my_character_name,
                  opponent_character_name );
-    match.run();
+    winner = match.run();
   }
   catch ( char const* e )
   {
@@ -202,6 +204,19 @@ int main( int argc, char* argv[] )
 
 WINDOW_DONE:
   window->close();
+
+  if ( winner == 1 )
+  {
+    std::cout << "Player 1 was the winner\n";
+  }
+  else if ( winner == 2 )
+  {
+    std::cout << "Player 2 was the winner\n";
+  }
+  else
+  {
+    std::cerr << "Error: No winner\n";
+  }
 
   // stop threads from handling messages
   messenger->stop_messages();

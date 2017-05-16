@@ -86,7 +86,7 @@ void Character::update( const STATE &state, char facing )
       _textures.get_texture( img_name, _execution_position[_state] ) );
 }
 
-unsigned int Character::get_health( void )
+float Character::get_health( void )
 {
   return _cur_health;
 }

@@ -49,7 +49,7 @@ class Character
    * This function get the current value of the characters health
    * @return unsigned int - The characters current health
    */
-  unsigned int get_health( void );
+  float get_health( void );
 
   /*
    * This function is used to get the current texture that the character is
@@ -66,7 +66,7 @@ class Character
 
  private:
   std::string _name;
-  unsigned int _cur_health;
+  float _cur_health;
   std::shared_ptr<sf::Texture> _character_texture;
   // right now there are no images above 32
   std::string _image_names[40];

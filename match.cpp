@@ -23,14 +23,25 @@ Match::Match( std::shared_ptr<sf::RenderWindow> window,
       _player1_state( STATE::IDLE ),
       _player2_state( STATE::IDLE )
 {
+  // load font file
+  if ( !_font.loadFromFile( "assets/fonts/yellowjacket.ttf" ) )
+    throw "Error loading Font: assets/fonts/yellowjacket.ttf";
+
+  // set font for names
+  _player1_name.setFont( _font );
+  _player2_name.setFont( _font );
+
   // load the background texture
   if ( !_background->loadFromFile( "assets/StageBackground.png" ) )
     throw "Error loading StageBackground.png";
 
+  // create the characters
   try
   {
     if ( my_player_num == 1 )
     {
+      _player1_name.setString( my_name );
+      _player2_name.setString( opponent_name );
       this->_player1 =
           std::unique_ptr<Character>( new Character( my_name, my_player_num ) );
       this->_player2 = std::unique_ptr<Character>(
@@ -38,23 +49,43 @@ Match::Match( std::shared_ptr<sf::RenderWindow> window,
     }
     else
     {
+      _player2_name.setString( my_name );
+      _player1_name.setString( opponent_name );
       this->_player1 = std::unique_ptr<Character>(
-          new Character( opponent_name, my_player_num ) );
+          new Character( opponent_name, opponent_num ) );
       this->_player2 =
-          std::unique_ptr<Character>( new Character( my_name, opponent_num ) );
+          std::unique_ptr<Character>( new Character( my_name, my_player_num ) );
     }
+    _player1_name.setPosition( 155, 5 );
+    _player2_name.setPosition(
+        850 - ( 25 * ( _player2_name.getString().getSize() - 1 ) ), 5 );
   }
   catch ( char const *e )
   {
     throw e;
-  }
+  }  // finished creating characters
 
-  // the bottom of the character is at 575 pixels yet the position funcitons use
+  // set the players' y_position
+  // the bottom of the character is at 575 pixels yet the position functions use
   // the top left corner
   _player1_y_position =
       575 - ( _player1->get_texture()->getSize().y * _scale_factor );
   _player2_y_position =
       575 - ( _player2->get_texture()->getSize().y * _scale_factor );
+
+  // create and position player 1's healthbar
+  _player1_healthbar = std::unique_ptr<sf::RectangleShape>(
+      new sf::RectangleShape( sf::Vector2f( 300, 25 ) ) );
+  _player1_healthbar->setPosition( sf::Vector2f( 150, 40 ) );
+  _player1_healthbar->setFillColor( sf::Color::Yellow );
+  _player1_health = _player1->get_health();
+
+  // create and position player 2's healthbar
+  _player2_healthbar = std::unique_ptr<sf::RectangleShape>(
+      new sf::RectangleShape( sf::Vector2f( 300, 25 ) ) );
+  _player2_healthbar->setPosition( sf::Vector2f( 550, 40 ) );
+  _player2_healthbar->setFillColor( sf::Color::Yellow );
+  _player2_health = _player2->get_health();
 
   _window->setFramerateLimit( 5 );
 }
@@ -63,7 +94,7 @@ Match::~Match()
 {
 }
 
-void Match::run()
+int Match::run()
 {
   // clear any outstanding messages
   /****************************************************************************/
@@ -80,17 +111,30 @@ void Match::run()
     sf::Sprite player1_sprite, player2_sprite;
 
     update_players( _player1_state, _player2_state );
+
+    set_healthbars();
+
+    if ( _player1_health <= 0 )
+    {
+      return 2;
+    }
+    else if ( _player2_health <= 0 )
+    {
+      return 1;
+    }
+
+    // set which events happened since last frame
     set_events();
 
-    // set the current textures
+    // set the sprites current textures, locations, and size
     player1_sprite.setTexture( *_player1->get_texture() );
     player2_sprite.setTexture( *_player2->get_texture() );
     player1_sprite.setPosition( _player1_x_position, _player1_y_position );
     player2_sprite.setPosition( _player2_x_position, _player2_y_position );
-
     player1_sprite.setScale( _scale_factor, _scale_factor );
     player2_sprite.setScale( _scale_factor, _scale_factor );
 
+    // set the current sprite rectangles to check for collisions later
     _player1_rect = player1_sprite.getGlobalBounds();
     _player2_rect = player2_sprite.getGlobalBounds();
 
@@ -100,10 +144,15 @@ void Match::run()
     _window->clear();
     // always draw the background first
     _window->draw( background );
+    _window->draw( _player1_name );
+    _window->draw( _player2_name );
+    _window->draw( *_player1_healthbar );
+    _window->draw( *_player2_healthbar );
     _window->draw( player1_sprite );
     _window->draw( player2_sprite );
     _window->display();
   }
+  return 0;
 }
 
 void Match::set_events()
@@ -228,6 +277,7 @@ void Match::invoke_events( const STATE &p1_state, const STATE &p2_state )
     player1_events( p1_state );
     player2_events( p2_state );
   }
+  check_boundaries();
 }
 
 void Match::update_players( const STATE &p1_state, const STATE &p2_state )
@@ -401,4 +451,36 @@ bool Match::collision( void )
     return true;
   }
   return false;
+}
+
+void Match::set_healthbars( void )
+{
+  // if health has been changed then update
+  if ( _player1_health > _player1->get_health() )
+  {
+    _player1_health = _player1->get_health();
+    std::cout << "Player1 health: " << _player1_health << std::endl;
+    float p1_scale = _player1_health / 100.0;
+    _player1_healthbar->setScale( p1_scale, 1 );
+  }
+  else if ( _player2_health > _player2->get_health() )
+  {
+    _player2_health = _player2->get_health();
+    std::cout << "Player2 health: " << _player2_health << std::endl;
+    float p2_scale = _player2_health / 100.0;
+    _player2_healthbar->setScale( p2_scale, 1 );
+    _player2_healthbar->move( 30, 0 );
+  }
+}
+
+void Match::check_boundaries( void )
+{
+  if ( _player1_x_position <= 0 )
+    _player1_x_position = 0;
+  else if ( _player1_x_position >= ( 1000 - _player1_rect.width ) )
+    _player1_x_position = 1000 - _player1_rect.width;
+  if ( _player2_x_position <= 0 )
+    _player2_x_position = 0;
+  else if ( _player2_x_position >= ( 1000 - _player2_rect.width ) )
+    _player2_x_position = 1000 - _player2_rect.width;
 }
