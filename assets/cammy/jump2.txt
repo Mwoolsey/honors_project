@@ -1,0 +1,12 @@
+7 294 106 0 40 80 120 154 194 242 40 40 34 40 48 52
+Sub-images:
+7
+
+Dimensions:
+294px, 106px
+
+Horizontal-offset:
+0px, 40px, 80px, 120px, 154px, 194px, 242px
+
+Sub-image widths:
+40px, 40px, 34px, 40px, 48px, 52px

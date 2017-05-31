@@ -2,21 +2,38 @@
 #include <fstream>
 #include <sstream>
 
-Character::Character( const std::string &name, unsigned int player )
-    : _name( name ), _cur_health( 100 ), _textures( name ), _state( IDLE )
+Character::Character( const std::string &name, unsigned int player ) try
+    : _name( name ),
+      _cur_health( 100 ),
+      _textures( name ),
+      _state( IDLE )
 {
   // initialize the current execution_position array to a value not used
   std::fill_n( _execution_position, HIT + 1, 99 );
   // set initial position
   _execution_position[IDLE] = 0;
 
+  // this will be the starting image
   std::string img_name = ( ( player == 1 ) ? "idle1" : "idle2" );
 
+  // set the initial character texture to idle
   _character_texture =
       std::make_shared<sf::Texture>( _textures.get_texture( img_name, 0 ) );
 
   // create the map that holds how many sub images there are per image
   set_position_counts( name );
+
+  _image_names[IDLE] = "idle";
+  _image_names[WALKING] = "walk";
+  _image_names[JUMPING] = "jump";
+  _image_names[PUNCHING] = "punch";
+  _image_names[KICKING] = "kick";
+  _image_names[CROUCHING] = "crouch";
+  _image_names[HIT] = "hit";
+}
+catch ( char const *e )
+{
+  throw e;
 }
 
 Character::~Character( void )
@@ -26,47 +43,7 @@ Character::~Character( void )
 void Character::update( const STATE &state, char facing )
 {
   // get the string for the image to match the state
-  std::string img_name;
-  switch ( state )
-  {
-    case IDLE:
-    {
-      img_name = "idle";
-      break;
-    }
-    case WALKING:
-    {
-      img_name = "walking";
-      break;
-    }
-    case JUMPING:
-    {
-      img_name = "jumping";
-      break;
-    }
-    case PUNCHING:
-    {
-      img_name = "punching";
-      break;
-    }
-    case KICKING:
-    {
-      img_name = "kicking";
-      break;
-    }
-    case CROUCHING:
-    {
-      img_name = "crouching";
-      break;
-    }
-    case HIT:
-    {
-      img_name = "hit";
-      break;
-    }
-    default:
-      break;
-  }
+  std::string img_name = _image_names[state];
 
   // if we are facing right, append a 1 to the img_name, else append a 2
   if ( facing == 'R' )
@@ -79,32 +56,37 @@ void Character::update( const STATE &state, char facing )
   {
     // if the execution_position is less than max, increment it. Else reset it
     // to IDLE
-    if ( _execution_position[state] < _position_counts[img_name] )
+    if ( _execution_position[state] < _position_counts[img_name] - 1 )
     {
       ++_execution_position[state];
     }
     else  // we have finished the loop of whatever image we are on
     {
       // set the current state to not being used
-      _execution_position[state] = 99;
+      //_execution_position[state] = 99;
       // reset the IDLE state to the beggining of the loop and change to IDLE
-      _execution_position[IDLE] = 0;
+      _execution_position[state] = 0;
       _state = IDLE;
     }
   }
   else  // the new state doesn't match the current state
   {
-    // start the image loop counter for the state we are in
     _execution_position[state] = 0;
+    _execution_position[_state] = 0;
+    // decrement health if character was hit
+    if ( state == HIT )
+      _cur_health -= 10;
+
+    // start the image loop counter for the state we are in
     _state = state;
   }
 
   // set the new current texture
   _character_texture = std::make_shared<sf::Texture>(
-      _textures.get_texture( img_name, _execution_position[state] ) );
+      _textures.get_texture( img_name, _execution_position[_state] ) );
 }
 
-unsigned int Character::get_health( void )
+float Character::get_health( void )
 {
   return _cur_health;
 }
@@ -114,9 +96,9 @@ std::shared_ptr<sf::Texture> Character::get_texture( void )
   return _character_texture;
 }
 
-STATE Character::get_state( void )
+std::pair<STATE, unsigned int> Character::get_state( void )
 {
-  return _state;
+  return std::make_pair( _state, _execution_position[_state] );
 }
 
 void Character::set_position_counts( const std::string &name )

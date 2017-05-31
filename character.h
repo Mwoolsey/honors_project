@@ -41,7 +41,7 @@ class Character
    * This function will update all the current information for the character
    * including: current health, current texture, and current state
    * @param const STATE &state - The new state to be updated to
-   * @param char facing - Which way the character is facing
+   * @param char facing - Which way the character is facing, R or L
    */
   void update( const STATE &state, char facing );
 
@@ -49,25 +49,30 @@ class Character
    * This function get the current value of the characters health
    * @return unsigned int - The characters current health
    */
-  unsigned int get_health( void );
+  float get_health( void );
 
   /*
    * This function is used to get the current texture that the character is
    * using
+   *
    * @return shared_ptr<Texture> - The characters current texture
    */
   std::shared_ptr<sf::Texture> get_texture( void );
 
   /*
    * This function is used to get the current state that the character is in
-   * @return STATE - The current state of the character
+   *
+   * @return pair<STATE, unsigned int> - The current state of the character and
+   *                                      what texture of that state we are in
    */
-  STATE get_state( void );
+  std::pair<STATE, unsigned int> get_state( void );
 
  private:
   std::string _name;
-  unsigned int _cur_health;
+  float _cur_health;
   std::shared_ptr<sf::Texture> _character_texture;
+  // right now there are no images above 32
+  std::string _image_names[40];
 
   // an object to hold all the textures for the given character
   Textures _textures;

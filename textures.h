@@ -27,7 +27,8 @@ class Textures
   std::unordered_map<std::string, std::vector<sf::Texture> > _textures;
   // 0: crouch, 1: hit, 2: idle, 3: jump, 4: kick, 5: punch, 6: walk
   std::vector<unsigned int> _image_counts, _widths, _heights;
-  std::vector<std::vector<unsigned int> > _offsets, _sub_widths;
+  std::vector<std::vector<unsigned int> > _forward_offsets, _forward_sub_widths;
+  std::vector<std::vector<unsigned int> > _reverse_offsets, _reverse_sub_widths;
   void set_parameters( const std::string &name );
   void set_textures( const std::string &name );
 };
